@@ -10,6 +10,7 @@ import { CATEGORIES, PRODUCTS, FEATURED_IDS, POPULAR_IDS, RECENT_IDS, FREELANCER
 import { FEATURED_SERVICES } from '../mock/extendedData';
 import FreelancerServiceCard from '../components/FreelancerServiceCard';
 import WorkAndEarnSection from '../components/WorkAndEarnSection';
+import PremiumHomeSections, { FooterTopStrip } from '../components/PremiumHomeSections';
 import * as Icons from 'lucide-react';
 
 const byIds = (ids) => ids.map((id) => PRODUCTS.find((p) => p.id === id)).filter(Boolean);
@@ -31,6 +32,9 @@ export default function Home() {
   return (
     <div className="relative">
       <Header />
+
+      {/* NEW: Premium Fiverr/Upwork-style sections (additive) */}
+      <PremiumHomeSections />
 
       {/* HERO */}
       <section className="relative overflow-hidden hero-glow">
@@ -209,6 +213,9 @@ export default function Home() {
           </button>
         </div>
       </section>
+
+      {/* NEW: Footer top strip (improves footer design without editing Footer.jsx) */}
+      <FooterTopStrip />
 
       <Footer />
     </div>
