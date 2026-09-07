@@ -7,6 +7,9 @@ import ProductCard from '../components/ProductCard';
 import { Button } from '../components/ui/button';
 import { Search, Shield, Sparkles, ArrowRight, TrendingUp, Clock3, Zap, CheckCircle2 } from 'lucide-react';
 import { CATEGORIES, PRODUCTS, FEATURED_IDS, POPULAR_IDS, RECENT_IDS, FREELANCER_CATEGORIES } from '../mock/data';
+import { FEATURED_SERVICES } from '../mock/extendedData';
+import FreelancerServiceCard from '../components/FreelancerServiceCard';
+import WorkAndEarnSection from '../components/WorkAndEarnSection';
 import * as Icons from 'lucide-react';
 
 const byIds = (ids) => ids.map((id) => PRODUCTS.find((p) => p.id === id)).filter(Boolean);
@@ -145,6 +148,27 @@ export default function Home() {
             <TrustBadge Icon={Shield} title="Secure & Protected" desc="Your payments are always safe and encrypted" />
             <TrustBadge Icon={Zap} title="Fast Delivery" desc="Get quality work delivered on time, every time" />
             <TrustBadge Icon={CheckCircle2} title="Top Quality" desc="Work with verified, top-rated freelancers" />
+          </div>
+        </div>
+      </section>
+
+      {/* WORK & EARN */}
+      <WorkAndEarnSection />
+
+      {/* FEATURED FREELANCER SERVICES */}
+      <section id="featured" className="relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Featured Services</h2>
+              <p className="mt-1.5 text-sm text-slate-400">Hand-picked top-rated services from our best freelancers</p>
+            </div>
+            <button onClick={() => navigate('/search?q=')} className="self-start md:self-auto inline-flex items-center gap-1 text-sm font-semibold text-emerald-400 hover:text-emerald-300 btn-hover">
+              Browse all services <ArrowRight size={15} />
+            </button>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURED_SERVICES.map((s) => <FreelancerServiceCard key={s.slug} service={s} />)}
           </div>
         </div>
       </section>

@@ -6,8 +6,8 @@ import { Input } from './ui/input';
 
 const NAV = [
   { label: 'Home', to: '/' },
-  { label: 'Services', to: '/search?category=digital-marketing' },
-  { label: 'Work & Earn', to: '/search?q=Automation' },
+  { label: 'Services', to: '/#featured' },
+  { label: 'Work & Earn', to: '/#work-earn' },
   { label: 'Become a Seller', to: '/search?q=Freelancer' },
 ];
 
