@@ -5,7 +5,14 @@ import Home from './pages/Home';
 import Search from './pages/Search';
 import ProductDetail from './pages/ProductDetail';
 import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import Profile from './pages/Profile';
 import { Toaster } from './components/ui/toaster';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import AuthAccessWidget from './components/AuthAccessWidget';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -26,15 +33,31 @@ function App() {
   return (
     <div className="App min-h-screen bg-[#0a0f1e] text-slate-100">
       <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/dashboard/:role" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-        <Toaster />
+        <AuthProvider>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route
+              path="/profile"
+              element={<ProtectedRoute><Profile /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/:role"
+              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+            />
+          </Routes>
+          <AuthAccessWidget />
+          <Toaster />
+        </AuthProvider>
       </BrowserRouter>
     </div>
   );
