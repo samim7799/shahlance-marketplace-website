@@ -8,6 +8,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { sellerService } from '../services/sellerService';
 import NotificationCenter from '../components/NotificationCenter';
+import AccountMenu, { AccountQuickActions } from '../components/AccountMenu';
 import { Avatar } from '../components/AuthAccessWidget';
 
 export default function MyAccount() {
@@ -81,6 +82,12 @@ export default function MyAccount() {
             </Link>
           </div>
         </div>
+
+        {/* Account menu (Profile / Dashboard / Messages / Notifications / Settings / Logout) */}
+        <div className="mt-5"><AccountMenu /></div>
+
+        {/* Role-based quick actions */}
+        <AccountQuickActions isApprovedSeller={isApprovedSeller} />
 
         {/* Dashboards */}
         <h2 className="mt-8 text-lg font-bold text-white">Your dashboards</h2>

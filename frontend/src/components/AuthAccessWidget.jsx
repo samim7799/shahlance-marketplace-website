@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { LogIn, UserPlus, LogOut, LayoutDashboard, User, ChevronDown, Headphones, ShieldCheck, Store } from 'lucide-react';
+import { LogIn, UserPlus, LogOut, LayoutDashboard, User, ChevronDown, Headphones, ShieldCheck, Store, MessageSquare, Settings as SettingsIcon, Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
@@ -68,6 +68,9 @@ export default function AuthAccessWidget() {
               </div>
               <MenuItem Icon={User} label="My Profile" onClick={() => navigate('/profile')} />
               <MenuItem Icon={LayoutDashboard} label="My Dashboards" onClick={() => navigate('/my-account')} />
+              <MenuItem Icon={MessageSquare} label="Messages" onClick={() => navigate('/messages')} />
+              <MenuItem Icon={Bell} label="Notifications" onClick={() => navigate('/notifications')} />
+              <MenuItem Icon={SettingsIcon} label="Settings" onClick={() => navigate('/settings')} />
               <MenuItem Icon={Store} label="Become a Seller" onClick={() => navigate('/become-seller')} />
               <MenuItem Icon={ShieldCheck} label="Admin Panel" onClick={() => navigate('/admin')} />
               <div className="border-t border-white/5" />

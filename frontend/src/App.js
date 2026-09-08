@@ -17,6 +17,9 @@ import MyAccount from './pages/MyAccount';
 import BecomeSeller from './pages/BecomeSeller';
 import SellerUpload from './pages/SellerUpload';
 import AdminPanel from './pages/AdminPanel';
+import Messages from './pages/Messages';
+import Settings from './pages/Settings';
+import NotificationsPage from './pages/NotificationsPage';
 import { Toaster } from './components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
@@ -69,6 +72,18 @@ function App() {
             <Route
               path="/admin"
               element={<ProtectedRoute><AdminPanel /></ProtectedRoute>}
+            />
+            <Route
+              path="/messages"
+              element={<ProtectedRoute><Messages /></ProtectedRoute>}
+            />
+            <Route
+              path="/settings"
+              element={<ProtectedRoute><Settings /></ProtectedRoute>}
+            />
+            <Route
+              path="/notifications"
+              element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>}
             />
             <Route
               path="/profile"
