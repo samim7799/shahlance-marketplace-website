@@ -13,8 +13,13 @@ import FindFreelancers from './pages/FindFreelancers';
 import PostJob from './pages/PostJob';
 import Contact from './pages/Contact';
 import Marketplace from './pages/Marketplace';
+import MyAccount from './pages/MyAccount';
+import BecomeSeller from './pages/BecomeSeller';
+import SellerUpload from './pages/SellerUpload';
+import AdminPanel from './pages/AdminPanel';
 import { Toaster } from './components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthAccessWidget from './components/AuthAccessWidget';
 import LiveSupportWidget from './components/LiveSupportWidget';
@@ -39,8 +44,9 @@ function App() {
     <div className="App min-h-screen bg-[#0a0f1e] text-slate-100">
       <BrowserRouter>
         <AuthProvider>
-          <ScrollToTop />
-          <Routes>
+          <NotificationsProvider>
+            <ScrollToTop />
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
             <Route path="/product/:id" element={<ProductDetail />} />
@@ -51,6 +57,19 @@ function App() {
             <Route path="/post-job" element={<PostJob />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/become-seller" element={<BecomeSeller />} />
+            <Route
+              path="/my-account"
+              element={<ProtectedRoute><MyAccount /></ProtectedRoute>}
+            />
+            <Route
+              path="/seller/upload"
+              element={<ProtectedRoute><SellerUpload /></ProtectedRoute>}
+            />
+            <Route
+              path="/admin"
+              element={<ProtectedRoute><AdminPanel /></ProtectedRoute>}
+            />
             <Route
               path="/profile"
               element={<ProtectedRoute><Profile /></ProtectedRoute>}
@@ -65,8 +84,9 @@ function App() {
             />
           </Routes>
           <AuthAccessWidget />
-          <LiveSupportWidget />
-          <Toaster />
+            <LiveSupportWidget />
+            <Toaster />
+          </NotificationsProvider>
         </AuthProvider>
       </BrowserRouter>
     </div>

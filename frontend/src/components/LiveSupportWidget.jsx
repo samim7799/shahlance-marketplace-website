@@ -21,6 +21,7 @@ export default function LiveSupportWidget() {
   const scrollRef = useRef(null);
 
   const hidden =
+    isAuthenticated ||
     ['/login', '/signup', '/forgot-password'].includes(location.pathname) ||
     location.pathname.startsWith('/dashboard');
 
@@ -29,9 +30,14 @@ export default function LiveSupportWidget() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, open]);
 
-  if (hidden) return null;
+  // Listen for global "open live support" trigger (from AuthAccessWidget menu)
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener('shahlance:open-support', handler);
+    return () => window.removeEventListener('shahlance:open-support', handler);
+  }, []);
 
-  const send = (e) => {
+  if (hidden && !open) return null;  const send = (e) => {
     e.preventDefault();
     const t = text.trim();
     if (!t) return;
@@ -47,7 +53,8 @@ export default function LiveSupportWidget() {
 
   return (
     <>
-      {/* Fixed bottom-left pill */}
+      {/* Fixed bottom-left pill (hidden when hidden condition met — panel can still open via event) */}
+      {!hidden && (
       <div className="fixed z-[60] bottom-5 left-5 sm:bottom-6 sm:left-6 flex items-center gap-2">
         <button
           onClick={() => setOpen((v) => !v)}
@@ -71,6 +78,7 @@ export default function LiveSupportWidget() {
           <span className="text-xs font-semibold">Account</span>
         </button>
       </div>
+      )}
 
       {/* Chat panel */}
       {open && (

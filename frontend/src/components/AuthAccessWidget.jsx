@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { LogIn, UserPlus, LogOut, LayoutDashboard, User, ChevronDown } from 'lucide-react';
+import { LogIn, UserPlus, LogOut, LayoutDashboard, User, ChevronDown, Headphones, ShieldCheck, Store } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
@@ -54,7 +54,7 @@ export default function AuthAccessWidget() {
             className="flex items-center gap-2 rounded-full border border-white/10 bg-[#0f1526]/95 backdrop-blur-xl shadow-2xl shadow-black/40 pl-1 pr-3 py-1 btn-hover"
           >
             <Avatar user={user} size={30} />
-            <span className="text-xs font-semibold text-slate-100 max-w-[120px] truncate hidden sm:inline">{user.fullName}</span>
+            <span className="text-xs font-semibold text-slate-100 hidden sm:inline">My Account</span>
             <ChevronDown size={13} className={`text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
           </button>
           {open && (
@@ -62,12 +62,16 @@ export default function AuthAccessWidget() {
               <div className="p-3 flex items-center gap-3 border-b border-white/5">
                 <Avatar user={user} size={38} />
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{user.fullName}</p>
-                  <p className="text-[11px] text-slate-400 truncate">@{user.username}</p>
+                  <p className="text-sm font-semibold text-white">My Account</p>
+                  <p className="text-[11px] text-slate-400 truncate">Signed in</p>
                 </div>
               </div>
               <MenuItem Icon={User} label="My Profile" onClick={() => navigate('/profile')} />
-              <MenuItem Icon={LayoutDashboard} label="Dashboard" onClick={goDashboard} />
+              <MenuItem Icon={LayoutDashboard} label="My Dashboards" onClick={() => navigate('/my-account')} />
+              <MenuItem Icon={Store} label="Become a Seller" onClick={() => navigate('/become-seller')} />
+              <MenuItem Icon={ShieldCheck} label="Admin Panel" onClick={() => navigate('/admin')} />
+              <div className="border-t border-white/5" />
+              <MenuItem Icon={Headphones} label="Live Support" onClick={() => { window.dispatchEvent(new CustomEvent('shahlance:open-support')); setOpen(false); }} />
               <div className="border-t border-white/5" />
               <MenuItem Icon={LogOut} label="Logout" danger onClick={async () => { await logout(); navigate('/'); }} />
             </div>

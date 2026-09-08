@@ -6,14 +6,14 @@ import { Input } from './ui/input';
 
 const NAV = [
   { label: 'Home', to: '/' },
-  { label: 'Services', to: '/#featured' },
   { label: 'Digital Marketplace', to: '/marketplace' },
   { label: 'Find Freelancers', to: '/find-freelancers' },
-  { label: 'Find Work', to: '/dashboard/worker' },
-  { label: 'Post a Job', to: '/post-job' },
   { label: 'Work & Earn', to: '/#work-earn' },
-  { label: 'Become a Seller', to: '/search?q=Freelancer' },
-  { label: 'Contact', to: '/contact' },
+  { label: 'Post a Job', to: '/post-job' },
+  { label: 'Become a Seller', to: '/become-seller' },
+  { label: 'All Services', to: '/#featured' },
+  { label: 'Find Work', to: '/dashboard/worker' },
+  { label: 'Contact Us', to: '/contact' },
 ];
 
 export default function Header() {
