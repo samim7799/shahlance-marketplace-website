@@ -157,7 +157,7 @@ export default function Home() {
       </section>
 
       {/* WORK & EARN */}
-      <WorkAndEarnSection />
+      <WorkAndEarnSection showDashboards={false} />
 
       {/* FEATURED FREELANCER SERVICES */}
       <section id="featured" className="relative">

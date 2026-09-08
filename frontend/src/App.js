@@ -12,10 +12,12 @@ import Profile from './pages/Profile';
 import FindFreelancers from './pages/FindFreelancers';
 import PostJob from './pages/PostJob';
 import Contact from './pages/Contact';
+import Marketplace from './pages/Marketplace';
 import { Toaster } from './components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthAccessWidget from './components/AuthAccessWidget';
+import LiveSupportWidget from './components/LiveSupportWidget';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -48,6 +50,7 @@ function App() {
             <Route path="/find-freelancers" element={<FindFreelancers />} />
             <Route path="/post-job" element={<PostJob />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route
               path="/profile"
               element={<ProtectedRoute><Profile /></ProtectedRoute>}
@@ -62,6 +65,7 @@ function App() {
             />
           </Routes>
           <AuthAccessWidget />
+          <LiveSupportWidget />
           <Toaster />
         </AuthProvider>
       </BrowserRouter>

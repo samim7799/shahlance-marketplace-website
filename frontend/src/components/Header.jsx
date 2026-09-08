@@ -7,6 +7,7 @@ import { Input } from './ui/input';
 const NAV = [
   { label: 'Home', to: '/' },
   { label: 'Services', to: '/#featured' },
+  { label: 'Digital Marketplace', to: '/marketplace' },
   { label: 'Find Freelancers', to: '/find-freelancers' },
   { label: 'Find Work', to: '/dashboard/worker' },
   { label: 'Post a Job', to: '/post-job' },

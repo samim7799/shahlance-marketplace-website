@@ -3,7 +3,7 @@ import * as Icons from 'lucide-react';
 import { ArrowRight, Briefcase, ArrowRightCircle } from 'lucide-react';
 import { TASK_CATEGORIES, WORK_STATS, HOW_IT_WORKS, DASHBOARDS } from '../mock/extendedData';
 
-export default function WorkAndEarnSection() {
+export default function WorkAndEarnSection({ showDashboards = true }) {
   return (
     <section id="work-earn" className="relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -63,6 +63,7 @@ export default function WorkAndEarnSection() {
         </div>
 
         {/* Dashboard Cards */}
+        {showDashboards && (
         <div className="mt-14 grid gap-5 lg:grid-cols-3">
           {(['buyer', 'worker', 'admin']).map((key) => {
             const d = DASHBOARDS[key];
@@ -91,6 +92,7 @@ export default function WorkAndEarnSection() {
             );
           })}
         </div>
+        )}
 
         {/* How It Works */}
         <div className="mt-16">
