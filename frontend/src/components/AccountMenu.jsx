@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationsContext';
-import { User, LayoutDashboard, MessageSquare, Bell, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { User, LayoutDashboard, MessageSquare, Bell, Settings as SettingsIcon, LogOut, Package, ShieldCheck, Store } from 'lucide-react';
 
 /**
  * Reusable My Account menu (additive).
@@ -20,6 +20,10 @@ export default function AccountMenu() {
   const items = [
     { to: '/profile', label: 'Profile', Icon: User },
     { to: dashboardTo, label: 'Dashboard', Icon: LayoutDashboard, match: '/dashboard' },
+    { to: '/services', label: 'Marketplace', Icon: Store },
+    { to: '/dashboard/buyer-orders', label: 'Buyer Orders', Icon: Package },
+    { to: '/dashboard/seller-orders', label: 'Seller Orders', Icon: Package },
+    { to: '/admin/orders', label: 'Admin Orders', Icon: ShieldCheck },
     { to: '/messages', label: 'Messages', Icon: MessageSquare },
     { to: '/notifications', label: 'Notifications', Icon: Bell, badge: unread },
     { to: '/settings', label: 'Settings', Icon: SettingsIcon },

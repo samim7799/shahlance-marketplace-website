@@ -20,9 +20,17 @@ import AdminPanel from './pages/AdminPanel';
 import Messages from './pages/Messages';
 import Settings from './pages/Settings';
 import NotificationsPage from './pages/NotificationsPage';
+import ServicesMarketplace from './pages/ServicesMarketplace';
+import ServiceDetails from './pages/ServiceDetails';
+import Checkout from './pages/Checkout';
+import OrderSuccess from './pages/OrderSuccess';
+import BuyerOrders from './pages/BuyerOrders';
+import SellerOrders from './pages/SellerOrders';
+import AdminOrders from './pages/AdminOrders';
 import { Toaster } from './components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
+import { OrdersProvider } from './contexts/OrdersContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthAccessWidget from './components/AuthAccessWidget';
 import LiveSupportWidget from './components/LiveSupportWidget';
@@ -48,6 +56,7 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <NotificationsProvider>
+            <OrdersProvider>
             <ScrollToTop />
             <Routes>
             <Route path="/" element={<Home />} />
@@ -97,10 +106,34 @@ function App() {
               path="/dashboard"
               element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
             />
+            {/* Additive: Buyer Marketplace + Service Ordering System */}
+            <Route path="/services" element={<ServicesMarketplace />} />
+            <Route path="/services/:id" element={<ServiceDetails />} />
+            <Route
+              path="/orders/checkout/:id"
+              element={<ProtectedRoute><Checkout /></ProtectedRoute>}
+            />
+            <Route
+              path="/orders/success/:id"
+              element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/buyer-orders"
+              element={<ProtectedRoute><BuyerOrders /></ProtectedRoute>}
+            />
+            <Route
+              path="/dashboard/seller-orders"
+              element={<ProtectedRoute><SellerOrders /></ProtectedRoute>}
+            />
+            <Route
+              path="/admin/orders"
+              element={<ProtectedRoute><AdminOrders /></ProtectedRoute>}
+            />
           </Routes>
           <AuthAccessWidget />
             <LiveSupportWidget />
             <Toaster />
+            </OrdersProvider>
           </NotificationsProvider>
         </AuthProvider>
       </BrowserRouter>
