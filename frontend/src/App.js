@@ -9,6 +9,9 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
+import FindFreelancers from './pages/FindFreelancers';
+import PostJob from './pages/PostJob';
+import Contact from './pages/Contact';
 import { Toaster } from './components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -42,6 +45,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/find-freelancers" element={<FindFreelancers />} />
+            <Route path="/post-job" element={<PostJob />} />
+            <Route path="/contact" element={<Contact />} />
             <Route
               path="/profile"
               element={<ProtectedRoute><Profile /></ProtectedRoute>}
