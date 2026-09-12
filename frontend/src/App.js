@@ -27,6 +27,7 @@ import OrderSuccess from './pages/OrderSuccess';
 import BuyerOrders from './pages/BuyerOrders';
 import SellerOrders from './pages/SellerOrders';
 import AdminOrders from './pages/AdminOrders';
+import NotFound from './pages/NotFound';
 import { Toaster } from './components/ui/toaster';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
@@ -129,6 +130,8 @@ function App() {
               path="/admin/orders"
               element={<ProtectedRoute><AdminOrders /></ProtectedRoute>}
             />
+            {/* Additive: catch-all 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
           <AuthAccessWidget />
             <LiveSupportWidget />
