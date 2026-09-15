@@ -224,7 +224,7 @@ agent_communication:
 
       Notes:
       - All data is frontend MOCK (localStorage). No backend calls are involved.
-      - Base URL: https://marketplace-search-8.preview.emergentagent.com
+      - Base URL: https://shahcode-review.preview.emergentagent.com
   - agent: "testing"
     message: |
       ✅ ALL TESTS PASSED - Comprehensive UI testing completed successfully.

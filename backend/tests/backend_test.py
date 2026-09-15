@@ -10,7 +10,7 @@ import uuid
 import pytest
 import requests
 
-BASE = os.environ.get('REACT_APP_BACKEND_URL', 'https://marketplace-preview-110.preview.emergentagent.com').rstrip('/')
+BASE = os.environ.get('REACT_APP_BACKEND_URL', 'https://shahcode-review.preview.emergentagent.com').rstrip('/')
 API = f"{BASE}/api"
 
 ADMIN = {"identifier": "rajavai247@gmail.com", "password": "Amijanina7799@@"}
