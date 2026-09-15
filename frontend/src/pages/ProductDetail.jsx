@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 import { Button } from '../components/ui/button';
-import { ChevronLeft, Star, Clock, Shield, CheckCircle2, MessageCircle, Heart, Share2, ChevronRight } from 'lucide-react';
+import { ChevronLeft, Star, Clock, Shield, CheckCircle2, MessageCircle, Heart, Share2, ChevronRight, BadgeCheck } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { CATEGORIES } from '../mock/data';
 import { useProducts } from '../contexts/ProductsContext';
@@ -90,6 +90,24 @@ export default function ProductDetail() {
                 <span className="h-4 w-px bg-white/10" />
                 <Link to={`/search?category=${product.category}`} className="text-emerald-400 hover:text-emerald-300 btn-hover">{category?.name}</Link>
               </div>
+
+              {/* Quality / trust indicators (scannable) */}
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {product.badge && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-[11px] font-semibold text-amber-300">
+                    <Star size={11} className="fill-amber-300" /> {product.badge}
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
+                  <BadgeCheck size={12} /> Verified seller
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-2.5 py-1 text-[11px] text-slate-300">
+                  <Shield size={12} /> Escrow protected
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-2.5 py-1 text-[11px] text-slate-300">
+                  <CheckCircle2 size={12} className="text-emerald-400" /> {product.seller.sales} sales
+                </span>
+              </div>
             </div>
 
             <div className="mt-8 card-surface rounded-2xl p-6">
@@ -121,7 +139,7 @@ export default function ProductDetail() {
           </div>
 
           {/* Right: price + seller */}
-          <div>
+          <div className="order-first lg:order-none">
             <div className="sticky top-24 space-y-5">
               <div className="card-surface rounded-2xl p-6">
                 <div className="flex items-baseline justify-between">

@@ -131,6 +131,23 @@ backend:
         comment: "PASS - All 10 backend auth endpoint tests passed. ✅ POST /api/auth/change-password: (1) Wrong current password returns 400 with correct error message. (2) Short password (<8 chars) returns 400. (3) Same password returns 400. (4) Valid password change returns {ok:true}, login with new password succeeds, login with old password fails with 400. (5) No Authorization header returns 401. ✅ PUT /api/auth/me: (6) Preferences (currency:EUR, language:Français, email.marketing:true) persist correctly. (7) GET /api/auth/me confirms persistence. ✅ Security: (8) Attempting to set role:admin via PUT /api/auth/me is correctly blocked by allowlist - role remains 'buyer'. All validation, authentication, and security checks working as expected."
 
 frontend:
+  - task: "Digital Marketplace — buyer UX (loading skeleton, detail trust chips, mobile CTA ordering)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Marketplace.jsx, /app/frontend/src/pages/ProductDetail.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Additive UX improvements to Digital Marketplace only (Marketplace.jsx, ProductDetail.jsx). (1) Marketplace now shows a loading SKELETON grid (8 cards) while the catalog is fetching, fixing the bug where the 'No products match' empty state flashed during initial load; real empty state only shows after load completes. (2) ProductDetail adds a scannable quality/trust chip row under the title (product.badge if present, Verified seller, Escrow protected, seller sales) using existing data only. (3) ProductDetail purchase/CTA card now surfaces first on mobile (order-first lg:order-none) so price + Continue button isn't buried below the long description; desktop layout unchanged. No backend/checkout/payment/orders/DB/auth/Accounts changes; reused existing components/styles. Needs UI retest."
+      - working: true
+        agent: "testing"
+        comment: "PASS — 7/7 on desktop + mobile. Loading skeleton shows during fetch (empty state no longer flashes); genuine empty state + Reset works; cards/View Details/Buy Now/sort/load-more intact. Detail: trust chip row (Bestseller/Verified seller/Escrow protected/1240 sales) present; all existing sections intact. Mobile: price card at Y180 vs description Y1237 (surfaces above content); no horizontal overflow. No console errors."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Comprehensive testing completed on desktop (1920x1080) and mobile (390x844). ALL 7 test items verified: MARKETPLACE (/marketplace): ✅ (1) Loading skeleton: 9 skeleton cards with animate-pulse appear during initial load, empty state did NOT flash (only appears when search genuinely returns 0 results). ✅ (2) Empty state: Search 'zzzznomatch123' shows 'No products match your filters' with 'Reset filters' button; clicking Reset restores 12 product cards. ✅ (3) No regressions: Hero 'Buy every digital service in one place', search input, 'Browse categories' section, sort dropdown, 12 product cards each with 'View Details' and 'Buy Now' buttons (both navigate to /product/:id), all working. PRODUCT DETAIL (/product/p-001 and /product/p-017): ✅ (4) NEW quality/trust chip row: Under product title, scannable chip row displays product badge ('Bestseller'), 'Verified seller' chip, 'Escrow protected' chip, and '1240 sales' chip — all 4 chips present and visible. ✅ (5) No regressions: Breadcrumb, Back button, gradient hero with icon, title, rating (4.9 with 512 reviews), 2-day delivery, category link, 'About this service' section, 'WHAT'S INCLUDED' section with 4 features, Tags section, price card with 'Continue' button (shows 'Added to cart' toast), Save/Share buttons, Seller card with 'Contact seller' button (shows 'Message sent' toast), 'Related services' section — all present and functional. MOBILE (390x844): ✅ (6) Price/purchase card positioning: On /product/p-001 at mobile width, price card (with 'Continue — $4.50' button) appears at Y:180, 'About this service' section at Y:1237.75 — price card correctly positioned ABOVE description (not buried at bottom). ✅ (7) Clean mobile rendering: /marketplace body width 390px (no overflow), /product/p-017 body width 390px (no overflow), all elements render correctly on mobile. No console errors detected. All NEW improvements working perfectly, NOTHING regressed."
   - task: "Accounts Marketplace — buyer-side browsing (landing, 13 categories, search, filter, sort, load-more, detail)"
     implemented: true
     working: true
@@ -696,3 +713,28 @@ agent_communication:
       
       **CONCLUSION:**
       NOTHING regressed. ALL Phase 2 elements present and working perfectly. Core functionality (search, filter, sort, load more, navigation) intact. All 7 test requirements passed on both desktop and mobile viewports.
+
+  - agent: "testing"
+    message: |
+      ✅ DIGITAL MARKETPLACE UX IMPROVEMENTS TESTING COMPLETE — ALL TESTS PASSED
+      
+      Verified additive UX improvements to ShahLance DIGITAL MARKETPLACE (general marketplace at /marketplace and product detail at /product/:id). This is SEPARATE from the Accounts section (/accounts). NO code modifications made. Public pages, no login required. Base URL: https://shahcode-review.preview.emergentagent.com
+      
+      **TEST RESULTS (7/7 PASSED):**
+      
+      **MARKETPLACE (/marketplace):**
+      ✅ 1) Loading state: Fresh load shows 9 skeleton cards (animated placeholders with animate-pulse class) while catalog fetches, then real product cards render. IMPORTANTLY: "No products match your filters" empty state did NOT flash during initial load (only appears when search/filter genuinely returns 0 results).
+      ✅ 2) Genuine empty state: Searched "zzzznomatch123" → empty state card appeared with "No products match your filters" heading and "Reset filters" button. Clicked Reset filters → 12 product cards restored successfully.
+      ✅ 3) No regressions: Hero "Buy every digital service in one place" + search input, "Browse categories" section with category quick-picker, sort dropdown, 12 product cards each with "View Details" and "Buy Now" buttons (both navigate to /product/:id), all working correctly.
+      
+      **PRODUCT DETAIL (/product/p-001 and /product/p-017):**
+      ✅ 4) NEW scannable quality/trust chip row: Under product title, chip row displays: product badge ("Bestseller"), "Verified seller" chip, "Escrow protected" chip, and "1240 sales" chip. All 4 chips present and visible.
+      ✅ 5) No regressions: Breadcrumb, Back button, gradient media hero with icon, title, rating (4.9 with 512 reviews) / delivery (2-day) / category row, "About this service" section, "WHAT'S INCLUDED" section with 4 features, Tags section, right-side price card with "Continue — $4.50" button (shows "Added to cart" toast), Save/Share buttons, Seller card with "Contact seller" button (shows "Message sent" toast), "Related services" grid — all present and functional.
+      
+      **MOBILE (390x844) — PRODUCT DETAIL:**
+      ✅ 6) Price/purchase card positioning: On /product/p-001 at mobile width (390x844), price card with "Continue — $4.50" button appears at Y:180, "About this service" section at Y:1237.75. Price card correctly positioned ABOVE the long description (not buried at bottom).
+      ✅ 7) Clean mobile rendering: /marketplace body width 390px (no horizontal overflow), /product/:id body width 390px (no horizontal overflow). All elements render cleanly on mobile.
+      
+      **CONSOLE:** No console errors detected.
+      
+      **CONCLUSION:** ALL 7 test items PASSED. NEW improvements render correctly AND nothing regressed. Ready to summarize and finish.

@@ -28,7 +28,7 @@ const PRIMARY_CATEGORIES = [
 ];
 
 export default function Marketplace() {
-  const { products: PRODUCTS } = useProducts();
+  const { products: PRODUCTS, loading: productsLoading } = useProducts();
   const [sp, setSp] = useSearchParams();
   const navigate = useNavigate();
   const initialCat = sp.get('category') || 'all';
@@ -208,7 +208,11 @@ export default function Marketplace() {
 
       {/* PRODUCTS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filtered.length === 0 ? (
+        {productsLoading ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-busy="true">
+            {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState onReset={() => { setQ(''); pickCategory('all'); }} />
         ) : (
           <>
@@ -291,6 +295,23 @@ function EmptyState({ onReset }) {
       <p className="mt-2 text-sm text-slate-400 max-w-md mx-auto">Try clearing the search or picking a different category.</p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <Button onClick={onReset} className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold">Reset filters</Button>
+      </div>
+    </div>
+  );
+}
+
+function ProductSkeleton() {
+  return (
+    <div className="card-surface rounded-2xl overflow-hidden animate-pulse">
+      <div className="aspect-[16/10] bg-white/5" />
+      <div className="p-4 space-y-3">
+        <div className="h-3 w-1/2 rounded bg-white/5" />
+        <div className="h-4 w-full rounded bg-white/5" />
+        <div className="h-4 w-4/5 rounded bg-white/5" />
+        <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+          <div className="h-3 w-16 rounded bg-white/5" />
+          <div className="h-5 w-14 rounded bg-white/5" />
+        </div>
       </div>
     </div>
   );
