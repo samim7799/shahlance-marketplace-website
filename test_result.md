@@ -133,15 +133,18 @@ backend:
 frontend:
   - task: "Accounts Marketplace — buyer-side browsing (landing, 13 categories, search, filter, sort, load-more, detail)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/pages/AccountsMarketplace.jsx, /app/frontend/src/pages/AccountDetail.jsx, /app/frontend/src/mock/accountsData.js, /app/frontend/src/App.js, /app/frontend/src/pages/Marketplace.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "New additive buyer-side Accounts Marketplace at /accounts (+ /accounts/:id detail). Self-contained accountsData.js with 13 categories (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce, Gaming, Creator, AI & Software, Website & Digital Assets, Community, Dating & Lifestyle, Others/Custom) and 52 listings. Landing: hero+search, popular chips, 13-category nav grid with per-category counts + All categories, result count, sort (popular/newest/price/rating), category+search filter with Clear, responsive grid, Load more (12/step). Detail: breadcrumb, gradient hero, escrow/category chips, rating/delivery/stock, description, 'What you get' grid, trust boxes, sticky purchase card with placeholder 'Buy now' (toast — checkout intentionally NOT wired) + Contact seller + related listings. Reuses Header/Footer/Button. App.js +2 routes; general Marketplace 'Accounts' card links to /accounts. No backend/product/checkout/payment changes. Screenshots verified landing (52 results, 13 categories) + detail."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Comprehensive testing completed on desktop (1440x900) and mobile (390x844) viewports. All 6 test items verified: (1) Landing page (/accounts) loads with hero heading 'Buy verified accounts with escrow', search input, 'Browse account categories' section showing all 13 category cards (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce, Gaming, Creator, AI & Software, Website & Digital Assets, Community, Dating & Lifestyle, Others/Custom), results count '52 results', sort dropdown, and 12 listing cards. (2) Search: typed 'Stripe', URL updated to q=Stripe, results filtered to 1 Stripe listing, clear (X) button cleared search, results returned to 52. (3) Category filtering: clicked 'Gaming Accounts', heading changed to 'Gaming Accounts', results count '4 results', URL updated to category=gaming, only gaming listings shown, 'Clear filter' reset to 52 results. (4) Sorting: 'Price: Low to High' shows lowest prices first ($0 Quote), 'Price: High to Low' shows highest first ($499), 'Top Rated' shows 4.9 rating first. (5) Load more: initial 12 cards, 'Load more accounts' button present, first click loaded 24 cards, second click loaded 36 cards. (6) Detail navigation: clicked listing card, navigated to /accounts/:id, breadcrumb present (Accounts Marketplace / Category / Title), gradient hero, 'Escrow protected' chip, rating/delivery/stock row, 'What you get' section with 4 features, sticky purchase card with price and 'Buy now' button, 'Contact seller' link, 'More in Category' related listings section, clicked related listing navigated to another detail page, breadcrumb category link navigated back to /accounts?category=ai-software. Mobile viewport: all elements render correctly. No console errors. Minor: Cloudflare RUM network requests fail (non-critical CDN analytics). All functionality working as specified."
 
   - task: "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
     implemented: true
@@ -266,13 +269,12 @@ frontend:
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Account Management — real password change + persisted preferences (buyer & seller)"
-    - "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
+    - "Accounts Marketplace — buyer-side browsing (landing, 13 categories, search, filter, sort, load-more, detail)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -485,3 +487,75 @@ agent_communication:
          - Old password correctly rejected
       
       **No console errors detected. All role-aware menu logic, admin card gating, password change validations, and preferences persistence working correctly.**
+
+  - agent: "testing"
+    message: |
+      ✅ ACCOUNTS MARKETPLACE TESTING COMPLETE — ALL TESTS PASSED
+      
+      Tested ONLY the ShahLance Accounts Marketplace section (/accounts and /accounts/:id) as requested. Base URL: https://shahcode-review.preview.emergentagent.com
+      
+      **Test Results (Desktop 1440x900 & Mobile 390x844):**
+      
+      1) ✅ LANDING PAGE LOADING (/accounts):
+         - Hero heading "Buy verified accounts with escrow" present
+         - Search input with placeholder "Search accounts — 'Instagram', 'Stripe', 'Binance'..." present
+         - "Browse account categories" section showing all 13 category cards:
+           ✓ Social Media Accounts, ✓ Email Accounts, ✓ Advertising Accounts, ✓ Payment & Finance Accounts, 
+           ✓ Crypto & Web3, ✓ E-commerce Accounts, ✓ Gaming Accounts, ✓ Creator Accounts, 
+           ✓ AI & Software Accounts, ✓ Website & Digital Assets, ✓ Community Accounts, 
+           ✓ Dating & Lifestyle, ✓ Others / Custom Accounts
+         - Results count showing "52 results"
+         - Sort dropdown present with 5 options
+         - Grid of 12 listing cards displayed initially
+      
+      2) ✅ SEARCH:
+         - Typed "Stripe" into search box and submitted (Enter)
+         - URL updated to /accounts?q=Stripe
+         - Results filtered to 1 Stripe-related listing
+         - Clicked clear (X) button, search input cleared
+         - Results returned to 52 after clear
+      
+      3) ✅ CATEGORY FILTERING:
+         - Clicked "Gaming Accounts" category card
+         - Heading changed to "Gaming Accounts"
+         - Results count dropped to "4 results"
+         - URL updated to /accounts?category=gaming
+         - Only gaming listings shown (4 cards)
+         - Clicked "Clear filter", results reset to 52
+      
+      4) ✅ SORTING:
+         - "Price: Low to High": First card shows "Quote" ($0 custom price)
+         - "Price: High to Low": First card shows $499.00 (highest price)
+         - "Top Rated": First card shows 4.9 rating
+      
+      5) ✅ LOAD MORE PAGINATION:
+         - Initial view shows 12 cards with "Load more accounts" button
+         - First click: 24 cards loaded
+         - Second click: 36 cards loaded
+         - Pagination working correctly
+      
+      6) ✅ ACCOUNT DETAIL NAVIGATION:
+         - Clicked listing card from landing grid
+         - Navigated to /accounts/a-ai-software-1 (ChatGPT Plus Account)
+         - Breadcrumb present: "Accounts Marketplace / AI & Software Accounts / ChatGPT Plus Account (1 Year)"
+         - Gradient hero with icon present
+         - "Escrow protected" chip present
+         - Rating (4.9 with 892 reviews), delivery (1-day), stock (14 in stock) row present
+         - "What you get" section with 4 feature checklist items
+         - Sticky purchase card with price ($79.00) and "Buy now" button
+         - "Contact seller" link present
+         - "More in AI & Software Accounts" related listings section with 4 related cards
+         - Clicked related listing (Midjourney), navigated to /accounts/a-ai-software-2
+         - Clicked breadcrumb category link, navigated back to /accounts?category=ai-software
+      
+      **Mobile Viewport (390x844):**
+         - All elements render correctly on mobile
+         - Landing page: hero, search, 13 categories, 12 cards, load more button all visible
+         - Detail page: breadcrumb, escrow chip, purchase card all visible
+      
+      **Console & Network:**
+         - ✓ No console errors detected
+         - ⚠ Minor: Cloudflare RUM (cdn-cgi/rum) network requests fail — non-critical CDN analytics, does not affect functionality
+      
+      **Conclusion:**
+      All 6 test items passed successfully on both desktop and mobile viewports. The Accounts Marketplace is fully functional with no critical issues. Client-side data (52 listings across 13 categories) working as expected. "Buy now" button shows toast message (checkout intentionally not wired per requirements).
