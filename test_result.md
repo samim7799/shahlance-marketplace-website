@@ -131,6 +131,23 @@ backend:
         comment: "PASS - All 10 backend auth endpoint tests passed. ✅ POST /api/auth/change-password: (1) Wrong current password returns 400 with correct error message. (2) Short password (<8 chars) returns 400. (3) Same password returns 400. (4) Valid password change returns {ok:true}, login with new password succeeds, login with old password fails with 400. (5) No Authorization header returns 401. ✅ PUT /api/auth/me: (6) Preferences (currency:EUR, language:Français, email.marketing:true) persist correctly. (7) GET /api/auth/me confirms persistence. ✅ Security: (8) Attempting to set role:admin via PUT /api/auth/me is correctly blocked by allowlist - role remains 'buyer'. All validation, authentication, and security checks working as expected."
 
 frontend:
+  - task: "Digital Marketplace — Phase 6 production readiness (error recovery, focus states, category card fix)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Marketplace.jsx, /app/frontend/src/pages/ProductDetail.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Phase 6 final production polish (Marketplace.jsx, ProductDetail.jsx only; shared CategoryIcon component NOT modified). (1) FIXED genuine UI/HTML bug: marketplace category cards rendered the shared CategoryIcon (which is itself a <Link>) inside a <button> — invalid interactive nesting that also duplicated the category name and could navigate to /search instead of filtering. Replaced with a local icon-only render (CategoryIconInline now draws just the gradient icon); the category name shows once via the existing span; clicking now purely filters in place. (2) ERROR RECOVERY: when the catalog fails to load (products empty after loading finishes), a ConnectionError card shows with a 'Try again' button that calls ProductsContext.refresh() (no context change). (3) Empty state messaging is now contextual (shows the search query and/or active category) with clearer copy. (4) ACCESSIBILITY focus states: added focus-visible rings to search input, sort select, category buttons, All categories, popular chips, Load more, card CTAs (Marketplace) and Continue + back button (ProductDetail); decorative icons aria-hidden. No layout change to the product grid. No backend/checkout/payment/orders/DB/auth/Accounts/shared-component changes. Needs UI retest."
+      - working: true
+        agent: "testing"
+        comment: "PASS — 10/10 desktop + mobile. Category cards show name exactly once + filter in place (no /search nav, no nested-interactive warnings). Contextual empty state (query + category) with restore; skeleton loads then 33 products (no empty-state flash). Keyboard focus rings visible on search/sort/category/chips/CTAs + detail Continue/back; aria-pressed on categories; sort/search labelled. No regressions (trust chips, toasts, related, mobile price-card above description Y180 vs Y1237). No console errors, no horizontal overflow."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Phase 6 production readiness verified on desktop (1440x900) and mobile (390x844). Tested ONLY /marketplace and /product/:id (NOT Accounts section). ALL 10 test items confirmed: CATEGORY CARD FIX: ✅ (1) Category cards show name EXACTLY ONCE — tested Crypto, Gift Cards, Digital Marketing — each appears 1 time in its button, no duplicates found. ✅ (2) Clicking category card (e.g., Crypto) FILTERS in place on /marketplace (URL updates to ?category=crypto, results heading changes to 'Crypto', product count updates), does NOT navigate to /search. Clicking 'All categories' resets filter (heading returns to 'All products'). Note: 'Accounts' card intentionally navigates to /accounts as expected. ✅ (3) No invalid nested-interactive HTML — category buttons do not contain <a> tags, no console warnings about nested interactives. ERROR RECOVERY & EMPTY STATE: ✅ (4) Empty state is CONTEXTUAL — search 'zzzznomatch' shows heading 'No products match \"zzzznomatch\"', 'Clear search & filters' button restores 12 products. Category + nonsense query shows 'No products match \"zzzznomatch999\" in Gift Cards' (mentions both query and category). ✅ (5) Normal load shows loading skeleton (8 cards with animate-pulse), empty state does NOT flash during initial load, 33 products load correctly. ACCESSIBILITY / FOCUS STATES: ✅ (6) Keyboard Tab navigation works — search input shows emerald focus ring (rgba(52, 211, 153, 0.7) boxShadow), Tab moves through popular chips, category buttons, sort control. Sort <select> has aria-label='Sort products'. Category buttons have aria-pressed (false/true toggle). ✅ (7) /product/p-001 — Back button and Continue button both show visible emerald focus rings when focused via keyboard. REGRESSION (desktop + mobile): ✅ (8) /marketplace — hero 'Buy every digital service in one place', search input functional, 15 category buttons, sort dropdown reorders (price-asc shows $2.75 first), 12 View Details + 12 Buy Now buttons (both navigate to /product/:id), Load more button present. ✅ (9) /product/p-001 — breadcrumb, media hero, title 'Aged Gmail Accounts (2018-2020) Bulk Pack', trust chip row (6 chips: Bestseller, Verified seller, Escrow protected, 1240 sales), About this service section, What's included section (4 features), Tags section, price card with Continue button (shows toast), Save/Share buttons, Contact seller button (shows toast), Related services section (4 cards navigate correctly). ✅ (10) Mobile (390x844) — /marketplace body width 390px (no overflow), /product/p-001 body width 390px (no overflow), price card appears ABOVE About section (Y:180 vs Y:1237). CONSOLE: ✅ No critical console errors, no nested interactive warnings. Backend: 33 products in DB, all API calls returning 200 OK. ALL Phase 6 items PASS. NOTHING regressed from Phase 1-5."
   - task: "Digital Marketplace — Phase 5 accessibility & consistency polish"
     implemented: true
     working: true
@@ -340,6 +357,25 @@ test_plan:
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "testing"
+    message: |
+      ✅ PHASE 6 PRODUCTION READINESS — ALL TESTS PASSED
+      
+      Tested ONLY /marketplace and /product/:id as requested (NOT Accounts section). Did NOT modify code. Base URL: https://shahcode-review.preview.emergentagent.com
+      
+      **SUMMARY:**
+      ✅ 1. Category card labels — PASS (name appears exactly once, no duplicates)
+      ✅ 2. Category card filtering — PASS (filters in place on /marketplace, does NOT navigate to /search, 'All categories' resets)
+      ✅ 3. No nested-interactive HTML — PASS (no invalid nesting, no console warnings)
+      ✅ 4. Empty state contextual — PASS (includes query text and category name, 'Clear search & filters' restores products)
+      ✅ 5. Loading skeleton — PASS (shows during load, empty state does NOT flash, 33 products load correctly)
+      ✅ 6. Keyboard focus states — PASS (Tab navigation works, emerald focus rings visible on search/sort/categories/chips, aria-pressed on category buttons)
+      ✅ 7. Product detail focus — PASS (Back and Continue buttons show focus rings)
+      ✅ 8. Marketplace regression — PASS (hero, search, 15 categories, sort, 12 cards with View Details + Buy Now, Load more)
+      ✅ 9. Product detail regression — PASS (breadcrumb, media, title, trust chips, About, What's included, Tags, price card, Save/Share, seller, Related)
+      ✅ 10. Mobile viewport — PASS (no overflow on /marketplace or /product/p-001, price card above description)
+      
+      **CONCLUSION:** All Phase 6 production readiness items verified. Desktop (1440x900) and mobile (390x844) both working perfectly. No console errors. Nothing regressed from Phase 1-5.
   - agent: "testing"
     message: |
       ✅ PHASE 5 ACCESSIBILITY & CONSISTENCY POLISH — ALL TESTS PASSED

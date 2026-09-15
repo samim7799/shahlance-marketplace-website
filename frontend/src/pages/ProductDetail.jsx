@@ -55,7 +55,7 @@ export default function ProductDetail() {
           <span className="text-slate-300 truncate">{product.title}</span>
         </nav>
 
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-sm text-slate-300 hover:text-white btn-hover mb-6">
+        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-1 text-sm text-slate-300 hover:text-white btn-hover mb-6 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70">
           <ChevronLeft size={16} /> Back
         </button>
 
@@ -153,7 +153,7 @@ export default function ProductDetail() {
                 </ul>
                 <Button
                   onClick={() => toast({ title: 'Added to cart', description: `${product.title} is ready for checkout.` })}
-                  className="mt-5 w-full h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold"
+                  className="mt-5 w-full h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
                 >
                   Continue — ${product.price.toFixed(2)}
                 </Button>
