@@ -185,6 +185,11 @@ class ForgotBody(BaseModel):
     email: EmailStr
 
 
+class ChangePasswordBody(BaseModel):
+    currentPassword: str
+    newPassword: str
+
+
 class OrderCreate(BaseModel):
     productId: str
     title: str
@@ -327,7 +332,7 @@ async def me(user: dict = Depends(get_current_user)):
 @api_router.put("/auth/me")
 async def update_me(patch: dict, user: dict = Depends(get_current_user)):
     # Allowlist: prevent privilege / flag injection (e.g. role, isSeller).
-    allowed = {'fullName', 'username', 'phone', 'country', 'profilePhoto', 'skills', 'services', 'company', 'bio'}
+    allowed = {'fullName', 'username', 'phone', 'country', 'profilePhoto', 'skills', 'services', 'company', 'bio', 'preferences'}
     clean_patch = {k: v for k, v in patch.items() if k in allowed}
     if 'username' in clean_patch:
         uname = str(clean_patch['username']).strip().lower()
@@ -339,6 +344,21 @@ async def update_me(patch: dict, user: dict = Depends(get_current_user)):
     await db.users.update_one({'id': user['id']}, {'$set': clean_patch})
     updated = await db.users.find_one({'id': user['id']})
     return sanitize_user(updated)
+
+
+@api_router.post("/auth/change-password")
+async def change_password(body: ChangePasswordBody, user: dict = Depends(get_current_user)):
+    if len(body.newPassword) < 8:
+        raise HTTPException(status_code=400, detail='New password must be at least 8 characters.')
+    record = await db.users.find_one({'id': user['id']})
+    if not record or not verify_password(body.currentPassword, record.get('passwordHash', '')):
+        raise HTTPException(status_code=400, detail='Your current password is incorrect.')
+    if verify_password(body.newPassword, record.get('passwordHash', '')):
+        raise HTTPException(status_code=400, detail='New password must be different from the current one.')
+    await db.users.update_one(
+        {'id': user['id']},
+        {'$set': {'passwordHash': hash_password(body.newPassword), 'updatedAt': now_iso()}})
+    return {'ok': True}
 
 
 @api_router.post("/auth/forgot-password")

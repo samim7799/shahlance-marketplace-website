@@ -111,6 +111,38 @@ user_problem_statement: |
    5) Add a professional "Live Support" chip and "Account" button as a floating widget (does not touch the existing Header component). Existing AuthAccessWidget stays.
    6) Marketplace UX must include: product search, category filtering, product cards, View Details, and a Buy/Purchase placeholder button.
 
+backend:
+  - task: "Account Management — change-password + preferences persistence"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "New POST /api/auth/change-password: requires auth (Bearer), verifies currentPassword against bcrypt hash (400 if wrong), enforces newPassword>=8 chars (400 if short), rejects reusing same password (400), then updates passwordHash. PUT /api/auth/me allowlist extended with 'preferences' (dict) so buyer/seller account preferences persist. Verified locally via curl: wrong current->400, correct->{ok:true}, login with new password succeeds, preferences saved."
+      - working: true
+        agent: "testing"
+        comment: "PASS — All 10 tests passed. change-password: wrong current->400, <8 chars->400, same password->400, valid->{ok:true}, login with new password succeeds & old fails, no auth header->401. preferences persist via PUT/GET /api/auth/me. Security: PUT /api/auth/me {role:admin} blocked by allowlist (role stayed 'buyer')."
+      - working: true
+        agent: "testing"
+        comment: "PASS - All 10 backend auth endpoint tests passed. ✅ POST /api/auth/change-password: (1) Wrong current password returns 400 with correct error message. (2) Short password (<8 chars) returns 400. (3) Same password returns 400. (4) Valid password change returns {ok:true}, login with new password succeeds, login with old password fails with 400. (5) No Authorization header returns 401. ✅ PUT /api/auth/me: (6) Preferences (currency:EUR, language:Français, email.marketing:true) persist correctly. (7) GET /api/auth/me confirms persistence. ✅ Security: (8) Attempting to set role:admin via PUT /api/auth/me is correctly blocked by allowlist - role remains 'buyer'. All validation, authentication, and security checks working as expected."
+
+frontend:
+  - task: "Account Management — real password change + persisted preferences (buyer & seller)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Settings.jsx, /app/frontend/src/services/authService.js, /app/frontend/src/contexts/AuthContext.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Settings page now does a REAL password change (was previously MOCKED/UI-only) via AuthContext.changePassword; loads/saves preferences (language, currency, email/push toggles) to backend via updateProfile({preferences}) with localStorage cache fallback; shows role badge (Buyer/Seller/Admin); currency is an editable select (payout currency for sellers). All other pages unchanged."
+
 frontend:
   - task: "Digital Marketplace page /marketplace (new, additive)"
     implemented: true
@@ -202,11 +234,25 @@ test_plan:
     - "Remove dashboard preview cards from public Home page"
     - "Role-based post-auth redirect"
     - "Global Live Support widget"
+    - "Account Management — change-password + preferences persistence"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "main"
+    message: |
+      NEW TASK (backend only): Completed the pending Accounts Section (buyer & seller account management). Please test ONLY the new backend auth endpoints; do not retest previously-passing marketplace/auth-redirect UI.
+      Test with a freshly registered user (POST /api/auth/register) and its Bearer token:
+      1) POST /api/auth/change-password wrong currentPassword -> 400.
+      2) POST /api/auth/change-password newPassword < 8 chars -> 400.
+      3) POST /api/auth/change-password reusing SAME password -> 400.
+      4) POST /api/auth/change-password correct currentPassword + valid new -> {ok:true}; then login with NEW password succeeds and OLD fails.
+      5) POST /api/auth/change-password with NO Authorization header -> 401/403.
+      6) PUT /api/auth/me with {"preferences":{"currency":"EUR","language":"Français","email":{"marketing":true}}} -> persisted; GET /api/auth/me reflects them.
+      7) PUT /api/auth/me must still ignore privilege fields (role/isSeller) — allowlist must not let 'role' through.
+      Existing admin: rajavai247@gmail.com / Amijanina7799@@.
+
   - agent: "main"
     message: |
       Please verify these specific bug-fix items via UI testing:
@@ -284,5 +330,26 @@ agent_communication:
       4) Auth — protected redirect works; signup with 'Hire People' -> /dashboard/buyer; signup with 'Find Work' -> /dashboard/worker; login routes to correct dashboard.
       5) Live Support widget — visible on /, /marketplace, /contact, /find-freelancers, /post-job, /product/:id; hidden on /login, /signup, /forgot-password, /dashboard/*; chat opens with agent greeting and auto-replies within ~1s (MOCKED).
       Regressions checked: /find-freelancers, /post-job, /contact, /search, /product/:id, /profile, /dashboard/admin all render correctly.
+
+  - agent: "testing"
+    message: |
+      ✅ BACKEND AUTH ENDPOINTS - ALL TESTS PASSED
+      
+      Tested Account Management backend auth endpoints (POST /api/auth/change-password, PUT /api/auth/me) with comprehensive test suite.
+      
+      **Test Results (10/10 passed):**
+      
+      1. ✅ POST /api/auth/change-password with wrong current password → 400 with message "Your current password is incorrect."
+      2. ✅ POST /api/auth/change-password with short password (<8 chars) → 400 with message "New password must be at least 8 characters."
+      3. ✅ POST /api/auth/change-password with same password → 400 with message "New password must be different from the current one."
+      4. ✅ POST /api/auth/change-password with valid credentials → {ok:true}
+      5. ✅ Login with NEW password after change → Success (token returned)
+      6. ✅ Login with OLD password after change → 400 (correctly rejected)
+      7. ✅ POST /api/auth/change-password without Authorization header → 401 (unauthorized)
+      8. ✅ PUT /api/auth/me with preferences {currency:"EUR", language:"Français", email:{marketing:true}} → Preferences returned correctly
+      9. ✅ GET /api/auth/me → Preferences persisted correctly
+      10. ✅ Security check: PUT /api/auth/me with {role:"admin"} → Role correctly remained 'buyer' (allowlist blocked privilege escalation)
+      
+      **All validation, authentication, and security checks working as expected. No issues found.**
       No critical issues found. Ready to finish.
 

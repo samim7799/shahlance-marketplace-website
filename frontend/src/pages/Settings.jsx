@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Save, Lock, Bell, Mail, ShieldCheck, Trash2, Sun, Moon, Globe2, CheckCircle2, AlertCircle, Wallet,
@@ -14,13 +14,17 @@ function readPrefs() { try { return JSON.parse(localStorage.getItem(PREFS_KEY) |
 function writePrefs(p) { localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }
 
 export default function Settings() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile, changePassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [prefs, setPrefs] = useState(() => readPrefs() || {
+  const isSeller = user?.role === 'seller' || user?.accountType === 'freelancer' || user?.accountType === 'both';
+  const roleLabel = user?.role === 'admin' ? 'Admin' : (isSeller ? 'Seller account' : 'Buyer account');
+
+  const defaultPrefs = {
     theme: 'dark',
     language: 'English',
+    currency: 'USD',
     email: {
       productApprovals: true,
       sellerApprovals: true,
@@ -38,34 +42,67 @@ export default function Settings() {
       orderUpdates: true,
       paymentUpdates: true,
     },
-  });
+  };
+
+  // Prefer server-persisted preferences, fall back to local cache then defaults.
+  const [prefs, setPrefs] = useState(() => ({
+    ...defaultPrefs,
+    ...(readPrefs() || {}),
+    ...(user?.preferences || {}),
+    email: { ...defaultPrefs.email, ...(readPrefs()?.email || {}), ...(user?.preferences?.email || {}) },
+    push: { ...defaultPrefs.push, ...(readPrefs()?.push || {}), ...(user?.preferences?.push || {}) },
+  }));
+
+  useEffect(() => {
+    if (user?.preferences) {
+      setPrefs((p) => ({
+        ...p,
+        ...user.preferences,
+        email: { ...p.email, ...(user.preferences.email || {}) },
+        push: { ...p.push, ...(user.preferences.push || {}) },
+      }));
+    }
+  }, [user]);
 
   const [pw, setPw] = useState({ current: '', next: '', confirm: '' });
   const [pwError, setPwError] = useState('');
   const [pwOk, setPwOk] = useState(false);
+  const [pwSaving, setPwSaving] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const setEmailToggle = (k) => setPrefs((p) => ({ ...p, email: { ...p.email, [k]: !p.email[k] } }));
   const setPushToggle = (k) => setPrefs((p) => ({ ...p, push: { ...p.push, [k]: !p.push[k] } }));
 
-  const save = () => {
+  const save = async () => {
     setSaving(true);
-    setTimeout(() => {
+    try {
       writePrefs(prefs);
+      if (user) await updateProfile({ preferences: prefs });
+      toast({ title: 'Preferences saved', description: 'Your account preferences are up to date.' });
+    } catch (err) {
+      toast({ title: 'Could not save', description: err.message || 'Please try again.' });
+    } finally {
       setSaving(false);
-      toast({ title: 'Preferences saved' });
-    }, 500);
+    }
   };
 
-  const changePassword = (e) => {
+  const submitPassword = async (e) => {
     e.preventDefault();
     setPwError(''); setPwOk(false);
+    if (!pw.current) return setPwError('Enter your current password.');
     if (pw.next.length < 8) return setPwError('New password must be at least 8 characters.');
     if (pw.next !== pw.confirm) return setPwError('Passwords do not match.');
-    // NOTE: real password change requires backend; UI-only success here.
-    setPwOk(true);
-    setPw({ current: '', next: '', confirm: '' });
-    toast({ title: 'Password updated', description: 'Your account is now protected with your new password.' });
+    setPwSaving(true);
+    try {
+      await changePassword({ currentPassword: pw.current, newPassword: pw.next });
+      setPwOk(true);
+      setPw({ current: '', next: '', confirm: '' });
+      toast({ title: 'Password updated', description: 'Your account is now protected with your new password.' });
+    } catch (err) {
+      setPwError(err.message || 'Could not update password.');
+    } finally {
+      setPwSaving(false);
+    }
   };
 
   const deleteAccount = async () => {
@@ -92,13 +129,18 @@ export default function Settings() {
           <ArrowLeft size={14} /> Back to My Account
         </Link>
         <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-white">Settings</h1>
-        <p className="text-sm text-slate-400 mt-1">Manage security, notifications and preferences.</p>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <p className="text-sm text-slate-400">Manage security, notifications and preferences.</p>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+            <ShieldCheck size={11} /> {roleLabel}
+          </span>
+        </div>
         <div className="mt-5"><AccountMenu /></div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           {/* Security */}
           <Card title="Security" Icon={Lock}>
-            <form onSubmit={changePassword} className="space-y-4">
+            <form onSubmit={submitPassword} className="space-y-4">
               {pwError && <div className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"><AlertCircle size={14} className="mt-0.5" /><span>{pwError}</span></div>}
               {pwOk && <div className="flex items-start gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200"><CheckCircle2 size={14} className="mt-0.5" /><span>Password updated.</span></div>}
               <Field label="Current password">
@@ -108,8 +150,8 @@ export default function Settings() {
                 <Field label="New password"><input type="password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className="input-dark" placeholder="Min 8 chars" /></Field>
                 <Field label="Confirm new"><input type="password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} className="input-dark" placeholder="Repeat" /></Field>
               </div>
-              <button className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold px-4 py-2 text-sm btn-hover inline-flex items-center gap-2">
-                <ShieldCheck size={14} /> Update password
+              <button disabled={pwSaving} className="rounded-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-slate-900 font-semibold px-4 py-2 text-sm btn-hover inline-flex items-center gap-2">
+                {pwSaving ? <span className="h-4 w-4 rounded-full border-2 border-slate-900 border-t-transparent animate-spin" /> : <><ShieldCheck size={14} /> Update password</>}
               </button>
               <p className="text-[11px] text-slate-500">Two-factor authentication coming soon.</p>
             </form>
@@ -129,11 +171,21 @@ export default function Settings() {
               </div>
               <p className="mt-1 text-[11px] text-slate-500">Light theme is coming soon.</p>
             </Field>
-            <Field label="Currency (payouts)">
-              <div className="input-dark flex items-center gap-2">
-                <Wallet size={14} className="text-slate-400" />
-                <span className="text-sm text-slate-200">USD (default)</span>
+            <Field label={isSeller ? 'Currency (payouts)' : 'Currency'}>
+              <div className="input-dark flex items-center gap-2 !px-2">
+                <Wallet size={14} className="text-slate-400 shrink-0" />
+                <select
+                  value={prefs.currency}
+                  onChange={(e) => setPrefs({ ...prefs, currency: e.target.value })}
+                  className="w-full bg-transparent text-sm text-slate-200 outline-none"
+                  style={{ colorScheme: 'dark' }}
+                >
+                  {['USD', 'EUR', 'GBP', 'BDT', 'INR', 'AUD', 'CAD'].map((c) => (
+                    <option key={c} className="bg-[#0f1526]">{c}</option>
+                  ))}
+                </select>
               </div>
+              <p className="mt-1 text-[11px] text-slate-500">{isSeller ? 'Used to display your payout balances.' : 'Used to display prices across the marketplace.'}</p>
             </Field>
           </Card>
 

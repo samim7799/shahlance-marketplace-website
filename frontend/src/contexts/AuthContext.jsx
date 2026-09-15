@@ -41,6 +41,10 @@ export function AuthProvider({ children }) {
     return updated;
   }, [user]);
 
+  const changePassword = useCallback(async ({ currentPassword, newPassword }) => {
+    return authService.changePassword({ currentPassword, newPassword });
+  }, []);
+
   const value = useMemo(() => ({
     user,
     isAuthenticated: !!user,
@@ -49,7 +53,8 @@ export function AuthProvider({ children }) {
     signUp,
     logout,
     updateProfile,
-  }), [user, loading, login, signUp, logout, updateProfile]);
+    changePassword,
+  }), [user, loading, login, signUp, logout, updateProfile, changePassword]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -65,6 +65,15 @@ export const authService = {
       throw new Error(apiError(e));
     }
   },
+
+  async changePassword({ currentPassword, newPassword }) {
+    try {
+      await api.post('/auth/change-password', { currentPassword, newPassword });
+      return { ok: true };
+    } catch (e) {
+      throw new Error(apiError(e));
+    }
+  },
 };
 
 // Utility: compute profile completion %
