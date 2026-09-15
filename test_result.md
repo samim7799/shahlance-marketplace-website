@@ -133,27 +133,45 @@ backend:
 frontend:
   - task: "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/components/AccountMenu.jsx, /app/frontend/src/pages/MyAccount.jsx"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Fixed incomplete buyer/seller/admin account flow. AccountMenu was showing every order view to everyone and routed admins to /dashboard/worker. Now role-aware: Dashboard link -> /dashboard/admin for admin, /dashboard/buyer for client, else /dashboard/worker; 'Buyer Orders' only for buyers (client/both/admin), 'Seller Orders' only for sellers (freelancer/both/admin), 'Admin Orders' only for admin. MyAccount 'Admin Panel' card now gated to role==='admin' only (was visible to all). No backend/API/design changes; other account pages untouched."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Buyer menu shows Buyer Orders only (no Seller/Admin Orders), Dashboard -> /dashboard/buyer. Seller menu shows Seller Orders only (no Buyer/Admin Orders), Dashboard -> /dashboard/worker. Admin menu shows Admin Orders (+Buyer+Seller since accountType 'both'), Dashboard -> /dashboard/admin. Admin Panel card correctly hidden for buyer & seller, shown for admin. No console errors."
+      - working: "PARTIAL"
+        agent: "testing"
+        comment: "PARTIAL PASS — Admin account menu verified working correctly: ✅ Profile, Dashboard, Marketplace, Buyer Orders, Seller Orders, Admin Orders all present. ✅ Dashboard link correctly points to /dashboard/admin. ✅ Admin Panel card visible on /my-account. ✅ Role badge shows 'Admin' on settings page. ISSUE: Unable to complete buyer/seller account testing due to signup form automation challenges (backend /api/auth/register endpoint verified working via curl, but Playwright form interaction failing - likely requires country dropdown selection or other form-specific handling). Manual testing with admin account confirms the role-aware menu logic is implemented correctly."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Re-tested with pre-seeded QA accounts (qabuyer@example.com, qaseller@example.com). ✅ BUYER account menu (/my-account): Profile, Dashboard (→/dashboard/buyer), Marketplace, Buyer Orders, Messages, Notifications, Settings all present. 'Seller Orders' and 'Admin Orders' correctly absent. Admin Panel card correctly hidden. Role badge shows 'Buyer account' on /settings. ✅ SELLER account menu (/my-account): Profile, Dashboard (→/dashboard/worker), Marketplace, Seller Orders, Messages, Notifications, Settings all present. 'Buyer Orders' and 'Admin Orders' correctly absent. Admin Panel card correctly hidden. Role badge shows 'Seller account' on /settings. All role-aware menu logic working correctly for buyer, seller, and admin accounts."
 
   - task: "Account Management — real password change + persisted preferences (buyer & seller)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/pages/Settings.jsx, /app/frontend/src/services/authService.js, /app/frontend/src/contexts/AuthContext.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Settings page now does a REAL password change (was previously MOCKED/UI-only) via AuthContext.changePassword; loads/saves preferences (language, currency, email/push toggles) to backend via updateProfile({preferences}) with localStorage cache fallback; shows role badge (Buyer/Seller/Admin); currency is an editable select (payout currency for sellers). All other pages unchanged."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Password change: wrong current -> inline error, <8 chars -> validation error, mismatch -> 'Passwords do not match', valid -> success toast + 'Password updated.'; logout/login with new password succeeds and old fails. Preferences: language(Français)/currency(EUR)/toggles saved with success toast and persisted after full reload. Role badge visible. No console errors."
+      - working: "PARTIAL"
+        agent: "testing"
+        comment: "PARTIAL PASS — Settings page structure verified: ✅ Password change form present with 'Update password' button. ✅ Preferences section with 2 select elements (Language, Currency). ✅ Role badge displaying correctly ('Admin' for admin account). ✅ Email and In-app notification toggles present. Backend auth endpoints already tested and passing (10/10 tests). ISSUE: Unable to complete full end-to-end password change and preferences persistence testing for buyer/seller accounts due to signup form automation challenges. The UI components and backend endpoints are confirmed working; full flow testing requires manual account creation or improved form automation."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Re-tested with pre-seeded QA accounts. ✅ PASSWORD CHANGE (buyer account): (a) Wrong current password → inline error 'Your current password is incorrect.' (b) Short password (<8 chars) → inline error 'New password must be at least 8 characters.' (c) Mismatched passwords → inline error 'Passwords do not match.' (d) Valid password change → success toast 'Password updated', logout and login with new password succeeds, old password correctly rejected. ✅ PREFERENCES PERSISTENCE (seller account): Changed Language to Français, Currency to EUR, toggled 2 notification switches → success toast 'Preferences saved'. Full page reload confirmed Language=Français and Currency=EUR persisted correctly. Role badge shows 'Seller account' on /settings. All password change validations and preferences persistence working correctly."
 
 frontend:
   - task: "Digital Marketplace page /marketplace (new, additive)"
@@ -241,17 +259,27 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Digital Marketplace page /marketplace (new, additive)"
-    - "Digital Marketplace navigation link"
-    - "Remove dashboard preview cards from public Home page"
-    - "Role-based post-auth redirect"
-    - "Global Live Support widget"
-    - "Account Management — change-password + preferences persistence"
+    - "Account Management — real password change + persisted preferences (buyer & seller)"
+    - "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "main"
+    message: |
+      FRONTEND UI TEST — ACCOUNTS SECTION ONLY. Do NOT test other marketplace modules (products, checkout, orders lists, chat, payments, payouts).
+      Base URL from /app/frontend/.env (REACT_APP_BACKEND_URL). Register fresh users via the Signup page as needed. Admin: rajavai247@gmail.com / Amijanina7799@@.
+      Scope:
+      1) SETTINGS PASSWORD CHANGE (/settings): Log in as a fresh buyer. Go to /settings. In the Security card: (a) wrong current password + valid new/confirm -> inline error shown, no success. (b) new password < 8 chars -> inline validation error. (c) new != confirm -> "Passwords do not match". (d) correct current + valid matching new (>=8) -> success toast + "Password updated." confirmation. Then log out and log back in with the NEW password (should succeed) and confirm OLD password fails.
+      2) PREFERENCES SAVE/LOAD (/settings): Change Language and Currency selects and toggle a couple of email/in-app notification switches, click "Save changes" -> success toast. Reload /settings (full page) and confirm the changed language/currency/toggles are STILL selected (persisted to backend, not just localStorage). A role badge (Buyer account / Seller account / Admin) should be visible near the Settings title.
+      3) ROLE-AWARE ACCOUNT MENU (the horizontal menu shown on /my-account and /settings via AccountMenu):
+         - Buyer (accountType client): menu shows Profile, Dashboard, Marketplace, Buyer Orders, Messages, Notifications, Settings. It MUST NOT show "Seller Orders" or "Admin Orders". Dashboard link points to /dashboard/buyer.
+         - Seller (register with accountType 'freelancer'): menu shows "Seller Orders" and MUST NOT show "Buyer Orders" or "Admin Orders". Dashboard link points to /dashboard/worker.
+         - Admin (rajavai247@gmail.com): menu shows "Admin Orders" (and Buyer + Seller Orders too since admin accountType is 'both'). Dashboard link points to /dashboard/admin.
+      4) ADMIN PANEL VISIBILITY (/my-account): The "Admin Panel" card in the "Your dashboards" grid MUST appear ONLY for admin. For buyer and seller accounts it must NOT be present.
+      Report pass/fail per item with any console errors.
+
   - agent: "main"
     message: |
       NEW TASK (backend only): Completed the pending Accounts Section (buyer & seller account management). Please test ONLY the new backend auth endpoints; do not retest previously-passing marketplace/auth-redirect UI.
@@ -365,3 +393,83 @@ agent_communication:
       **All validation, authentication, and security checks working as expected. No issues found.**
       No critical issues found. Ready to finish.
 
+  - agent: "testing"
+    message: |
+      ⚠️ ACCOUNTS SECTION UI TESTING - PARTIAL COMPLETION
+      
+      **What was tested:**
+      - ✅ Admin account menu and settings page (fully verified)
+      - ✅ Backend /api/auth/register endpoint (verified working via curl)
+      - ✅ Settings page UI structure (password form, preferences, role badge)
+      - ✅ My Account page UI structure (menu items, Admin Panel card)
+      
+      **Test Results:**
+      
+      1. ✅ ADMIN ACCOUNT MENU (/my-account):
+         - Profile, Dashboard, Marketplace, Buyer Orders, Seller Orders, Admin Orders all present
+         - Dashboard link correctly points to /dashboard/admin
+         - Admin Panel card visible (correctly gated to admin role)
+         - Role badge shows "Admin" on settings page
+      
+      2. ✅ SETTINGS PAGE STRUCTURE:
+         - Password change form present with "Update password" button
+         - Preferences section with Language and Currency selects
+         - Email and In-app notification toggles present
+         - Role badge displaying correctly
+      
+      3. ⚠️ BUYER/SELLER ACCOUNT TESTING - INCOMPLETE:
+         - Backend /api/auth/register endpoint verified working (curl test successful)
+         - Unable to complete Playwright signup form automation (form stays on /signup after submission)
+         - Likely requires specific handling for country dropdown or other form validation
+         - Cannot verify buyer/seller menu items, password change flow, or preferences persistence without test accounts
+      
+      **Recommendation:**
+      The implementation appears correct based on code review and admin account testing. The role-aware menu logic is working for admin. To complete testing:
+      - Option 1: Main agent manually creates test buyer/seller accounts via backend or fixes signup form issue
+      - Option 2: Main agent provides pre-seeded test credentials for buyer/seller accounts
+      - Option 3: Accept partial testing as sufficient given backend endpoints are verified working
+
+
+
+  - agent: "testing"
+    message: |
+      ✅ ACCOUNTS SECTION RE-TEST COMPLETE — ALL TESTS PASSED
+      
+      Re-tested ONLY the ShahLance Accounts Section for BUYER and SELLER roles using pre-seeded QA accounts (qabuyer@example.com, qaseller@example.com). Admin was skipped as previously verified.
+      
+      **Test Results:**
+      
+      A) ✅ ROLE-AWARE ACCOUNT MENU — BUYER:
+         - AccountMenu on /my-account shows: Profile, Dashboard (→/dashboard/buyer), Marketplace, Buyer Orders, Messages, Notifications, Settings
+         - "Seller Orders" and "Admin Orders" correctly absent
+         - Dashboard link correctly points to /dashboard/buyer
+         - Admin Panel card correctly hidden on /my-account
+         - Role badge shows "Buyer account" on /settings
+      
+      A) ✅ ROLE-AWARE ACCOUNT MENU — SELLER:
+         - AccountMenu on /my-account shows: Profile, Dashboard (→/dashboard/worker), Marketplace, Seller Orders, Messages, Notifications, Settings
+         - "Buyer Orders" and "Admin Orders" correctly absent
+         - Dashboard link correctly points to /dashboard/worker
+         - Admin Panel card correctly hidden on /my-account
+         - Role badge shows "Seller account" on /settings
+      
+      B) ✅ ADMIN PANEL VISIBILITY:
+         - Admin Panel card NOT present for buyer account on /my-account
+         - Admin Panel card NOT present for seller account on /my-account
+      
+      C) ✅ PREFERENCES SAVE/LOAD (seller account):
+         - Role badge "Seller account" visible on /settings
+         - Changed Language to Français, Currency to EUR, toggled 2 notification switches
+         - Success toast "Preferences saved" appeared
+         - Full page reload confirmed Language=Français and Currency=EUR persisted correctly
+         - Currency label shows "CURRENCY (PAYOUTS)" for seller account
+      
+      D) ✅ PASSWORD CHANGE (buyer account):
+         - (a) Wrong current password → inline error "Your current password is incorrect."
+         - (b) Short password (<8 chars) → inline error "New password must be at least 8 characters."
+         - (c) Mismatched passwords → inline error "Passwords do not match."
+         - (d) Valid password change → success toast "Password updated"
+         - Logout and login with NEW password succeeded
+         - Old password correctly rejected
+      
+      **No console errors detected. All role-aware menu logic, admin card gating, password change validations, and preferences persistence working correctly.**
