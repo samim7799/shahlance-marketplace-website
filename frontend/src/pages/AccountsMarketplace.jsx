@@ -8,7 +8,7 @@ import {
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { ACCOUNT_CATEGORIES, ACCOUNT_LISTINGS, ACCOUNTS_MARKETPLACE_STATS, getListingStats } from '../mock/accountsData';
+import { ACCOUNT_CATEGORIES, ACCOUNT_LISTINGS, ACCOUNTS_MARKETPLACE_STATS, getListingStats, getAccountCategory, getListingFeatures } from '../mock/accountsData';
 
 const SORTS = [
   { id: 'popular', label: 'Most Popular' },
@@ -221,11 +221,32 @@ export default function AccountsMarketplace() {
       {/* LISTINGS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filtered.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-16 max-w-lg mx-auto">
             <div className="mx-auto h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center"><Search className="text-slate-400" /></div>
-            <h3 className="mt-4 text-lg font-bold text-white">No accounts found</h3>
-            <p className="mt-1 text-sm text-slate-400">Try a different keyword or category.</p>
-            <button onClick={() => { setQ(''); pickCategory('all'); }} className="mt-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold px-5 py-2 text-sm btn-hover">Reset filters</button>
+            <h3 className="mt-4 text-lg font-bold text-white">
+              No accounts match{q ? ` “${q}”` : ' your filters'}{activeCat !== 'all' && activeCatMeta ? ` in ${activeCatMeta.name}` : ''}
+            </h3>
+            <p className="mt-1.5 text-sm text-slate-400">Try removing a filter, checking your spelling, or browse a popular category below.</p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              {ACCOUNT_CATEGORIES.slice(0, 6).map((c) => {
+                const CIcon = Icons[c.icon] || Icons.Box;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => { setQ(''); const next = new URLSearchParams(sp); next.delete('q'); setSp(next); pickCategory(c.id); }}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-emerald-500/30 px-3 py-1.5 text-xs text-slate-300 btn-hover"
+                  >
+                    <CIcon size={12} className="text-emerald-400" /> {c.name}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              {q && (
+                <button onClick={() => { setQ(''); const next = new URLSearchParams(sp); next.delete('q'); setSp(next); setVisibleCount(12); }} className="rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 font-semibold px-5 py-2 text-sm btn-hover">Clear search</button>
+              )}
+              <button onClick={() => { setQ(''); pickCategory('all'); const next = new URLSearchParams(sp); next.delete('q'); setSp(next); }} className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold px-5 py-2 text-sm btn-hover">Browse all accounts</button>
+            </div>
           </div>
         ) : (
           <>
@@ -260,6 +281,8 @@ export default function AccountsMarketplace() {
 function AccountCard({ listing }) {
   const Icon = Icons[listing.icon] || Icons.Package;
   const stats = getListingStats(listing);
+  const typeName = (getAccountCategory(listing.category) || {}).name || 'Account';
+  const topBenefit = (getListingFeatures(listing) || [])[0];
   return (
     <Link
       to={`/accounts/${listing.id}`}
@@ -293,6 +316,18 @@ function AccountCard({ listing }) {
         <h3 className="text-sm sm:text-[15px] font-semibold text-white leading-snug clamp-2 group-hover:text-emerald-300 btn-hover">
           {listing.title}
         </h3>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] font-medium text-slate-300">{typeName}</span>
+          <span className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-300 inline-flex items-center gap-1">
+            <Icons.Truck size={10} /> {listing.deliveryDays}-day delivery
+          </span>
+        </div>
+        {topBenefit && (
+          <div className="flex items-start gap-1.5 text-[11px] text-slate-400">
+            <Icons.CheckCircle2 size={12} className="text-emerald-400 mt-0.5 shrink-0" />
+            <span className="clamp-1">{topBenefit}</span>
+          </div>
+        )}
         <div className="flex items-center gap-3 text-xs text-slate-400">
           <span className="inline-flex items-center gap-1">
             <Star size={13} className="text-amber-400 fill-amber-400" />

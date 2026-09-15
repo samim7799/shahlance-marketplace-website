@@ -141,6 +141,12 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
+        comment: "PHASE 2 buyer-experience enhancement (additive, Accounts files only: AccountsMarketplace.jsx, AccountDetail.jsx). (1) Listing cards now show an account-type pill (category), a delivery-expectation chip ('N-day delivery'), and a one-line key benefit (getListingFeatures[0]). (2) Detail page gained an 'At a glance' comparison-friendly quick-facts block (account type, price, delivery time, availability, ownership, warranty, buyer protection, seller rating) placed before 'What you get' to sharpen the buyer decision hierarchy. (3) Empty state is now contextual (shows the query/active category), offers 6 recovery category chips, and clearer Clear search / Browse all actions. Uses existing data/helpers only; no backend/API/DB/checkout/orders/auth changes. Needs UI retest."
+      - working: true
+        agent: "testing"
+        comment: "PASS (Phase 2) — desktop + mobile. Cards show account-type pill, delivery chip, key-benefit line on all cards; Phase 1 elements intact. Empty state contextual (includes query text + category name), 6 recovery chips filter correctly, Clear search + Browse all work. Detail 'At a glance' block present before 'What you get' with all 8 quick-fact rows. All Phase 1 detail sections intact. No regressions, no console errors."
+      - working: "NA"
+        agent: "main"
         comment: "PREMIUM/TRUST enhancement (additive, Accounts files only: accountsData.js, AccountsMarketplace.jsx, AccountDetail.jsx). Added: (1) social-proof stats bar under landing hero; (2) landing cards show verified-seller badge, 'X sold', and low-stock 'Only N left'; (3) detail page adds social-proof row (sold/viewing/last sold), seller trust card (verified, seller rating, sales, response time, member since, KYC), 'How escrow protects you' 3-step, buyer-guarantees grid (replacement warranty, money-back, KYC sellers, secure handover), and FAQ accordion; (4) purchase card shows verified-seller + sold chips and escrow/secure/warranty assurance rows. Derived deterministically from existing listing data; no backend/checkout/orders/DB changes. Needs UI retest."
       - working: true
         agent: "testing"
@@ -154,6 +160,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "PASS — Premium/trust UI enhancements verified. Comprehensive testing (24 tests) on desktop (1440x900) and mobile (390x844). LANDING (/accounts): ✅ Hero 'Buy verified accounts with escrow' + search input. ✅ NEW social-proof stats bar with 4 stats (12,400+ Accounts delivered, 4.9/5 Average buyer rating, 100% Escrow protected, 1-2 days Typical handover). ✅ All 13 category cards present. ✅ Result count '52 results'. ✅ NEW listing cards show verified-seller badge (13 found), 'X sold' (12 found), and low-stock 'Only N left' badges (4 found). ✅ Search (Binance->1 result, Clear->52), category filter (Gaming->4 results, Clear->52), sort (Low/High/Top Rated), and load more (12->24 cards) all work. DETAIL (/accounts/:id): ✅ Breadcrumb, gradient hero, escrow chip, rating/delivery/stock row. ✅ NEW social-proof row (X sold, N viewing now, Last sold Xh ago). ✅ NEW seller trust card (seller name, verified badge, seller rating, sales count, Responds ~Xh, Member since, KYC Verified). ✅ Existing 'What you get' (4 features). ✅ NEW 'How escrow protects you' (3 steps). ✅ NEW buyer-guarantees grid (4 guarantees: Replacement warranty, Money-back protection, Identity-checked sellers, Private secure handover). ✅ NEW FAQ accordion (4 items, opens on click). ✅ Purchase card with price, NEW verified-seller + 'X sold' chips, delivery/availability/protection rows, 'Buy now' button, 'Contact seller' link, and NEW assurance rows (escrow/secure handover/warranty). ✅ 'More in Category' related section (3 cards, navigation works). MOBILE: ✅ All elements render correctly. CONSOLE: ✅ No errors. Minor: 2 Cloudflare RUM requests failed (non-critical CDN analytics). NOTHING regressed. All NEW premium/trust elements present and working. Core functionality (search, filter, sort, load more, navigation) intact."
+      - working: true
+        agent: "testing"
+        comment: "PASS — PHASE 2 additive UI improvements verified. Comprehensive testing on desktop (1440x900) and mobile (390x844). LANDING (/accounts): ✅ NEW PHASE 2: (1a) Account-type pills showing category names on all 12 cards (e.g., 'Social Media Accounts', 'Email Accounts', 'AI & Software Accounts'). (1b) Green delivery chips showing '1-day delivery' or '2-day delivery' on all 12 cards. (1c) Key benefit with check icon visible on cards. ✅ PHASE 1 elements still present: social-proof stats bar (4 stats), verified-seller badges, 'X sold' indicators (12 found), low-stock 'Only N left' badges (4 found). ✅ Core functionality intact: search (Binance->1 result, Clear->52), category filter (Gaming->4 results, Clear->52), sort dropdown, load more (12->24 cards). IMPROVED EMPTY STATE: ✅ NEW PHASE 2: (4) Contextual heading includes query text 'zzzznotfound'. (4) Guidance text 'Try removing a filter' present. (4) 6 clickable category recovery chips present (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce). (4) 'Clear search' button present. (4) 'Browse all accounts' button present. (5) Recovery chip click filters to category correctly. (5) Empty state within category shows both query and category name in heading. DETAIL (/accounts/:id): ✅ NEW PHASE 2: (6) 'At a glance' block present BEFORE 'What you get' section with all 8 comparison-friendly quick-facts rows: Account type, Price, Delivery time, Availability, Ownership, Warranty, Buyer protection, Seller rating. ✅ PHASE 1 elements still present: (7) Breadcrumb, gradient hero, escrow chip, rating/delivery/stock row, social-proof row (sold/viewing/last sold), seller trust card (verified/rating/sales/responds/member-since/KYC), 'What you get' section, 'How escrow protects you' 3-step, buyer-guarantees grid (4 items), FAQ accordion (opens on click), purchase card (Buy now shows toast, Contact seller link), verified-seller + sold chips, assurance rows, related listings navigation. MOBILE (390x844): ✅ All Phase 2 elements render correctly on mobile. CONSOLE: ✅ No errors. Minor: Cloudflare RUM CDN analytics requests fail (non-critical). NOTHING regressed. ALL Phase 2 elements present and working perfectly."
 
   - task: "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
     implemented: true
@@ -288,6 +297,24 @@ test_plan:
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "main"
+    message: |
+      Verify ShahLance Accounts Marketplace Phase 2 additive UI improvements. Test ONLY the Accounts section (public, no login). Do NOT modify code. Base URL from /app/frontend/.env. Routes: /accounts and /accounts/:id. Confirm the NEW Phase 2 elements render AND nothing from before regressed. Report ONLY issues if found; otherwise confirm pass.
+
+      LANDING (/accounts):
+      1) Listing cards — each card now shows THREE new value highlights: (a) an account-type pill showing the category name (e.g. "Social Media Accounts", "Email Accounts"), (b) a green delivery chip like "1-day delivery" / "2-day delivery", and (c) a one-line key benefit with a check icon (e.g. "Full account ownership transfer" or "Login credentials delivered instantly"). Verify these appear on the cards.
+      2) Existing card elements still present: verified-seller badge, "X sold", rating, price, escrow chip, and "Only N left" on low-stock cards.
+      3) Core still works: the social-proof stats bar under the hero, 13 category cards, "52 results", search, category filter + Clear, sort dropdown, and "Load more accounts" (12 -> 24).
+
+      IMPROVED EMPTY STATE:
+      4) Navigate to /accounts?q=zzzznotfound (a query with no matches). Confirm the empty state shows a CONTEXTUAL heading that includes the query text (e.g. contains "zzzznotfound"), a helpful guidance line, a row of ~6 clickable category recovery chips (clicking one should filter to that category and show its listings), a "Clear search" button, and a "Browse all accounts" button that resets to 52 results.
+      5) Also test empty state within a category: go to a category then type a nonsense query and confirm the heading mentions both the query and the category name.
+
+      DETAIL (/accounts/:id — open any listing):
+      6) NEW "At a glance" block appears (before the "What you get" section) as a comparison-friendly quick-facts list with rows: Account type, Price, Delivery time, Availability, Ownership, Warranty, Buyer protection, Seller rating — each with a value.
+      7) Everything from before still renders: breadcrumb, hero, social-proof row, seller trust card, "What you get", "How escrow protects you" 3 steps, buyer-guarantees, FAQ accordion (opens on click), sticky purchase card (Buy now shows toast, no checkout), Contact seller, related listings navigation.
+
+      Test desktop (1440x900) and mobile (390x844).
   - agent: "main"
     message: |
       FRONTEND UI TEST — ACCOUNTS SECTION ONLY. Do NOT test other marketplace modules (products, checkout, orders lists, chat, payments, payouts).
@@ -594,41 +621,46 @@ agent_communication:
 
   - agent: "testing"
     message: |
-      ✅ ACCOUNTS MARKETPLACE PREMIUM/TRUST UI ENHANCEMENTS — ALL TESTS PASSED
+      ✅ PHASE 2 ACCOUNTS MARKETPLACE UI IMPROVEMENTS — ALL TESTS PASSED
       
-      Comprehensive testing (24 tests) completed on desktop (1440x900) and mobile (390x844). Base URL: https://shahcode-review.preview.emergentagent.com
+      Comprehensive testing completed on desktop (1440x900) and mobile (390x844). Base URL: https://shahcode-review.preview.emergentagent.com
       
-      **LANDING PAGE (/accounts) — ALL PASS:**
-      ✅ Hero "Buy verified accounts with escrow" + search input present
-      ✅ NEW: Social-proof stats bar with 4 stats (12,400+ Accounts delivered, 4.9/5 Average buyer rating, 100% Escrow protected, 1-2 days Typical handover)
-      ✅ All 13 category cards present (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce, Gaming, Creator, AI & Software, Website & Digital Assets, Community, Dating & Lifestyle, Others/Custom)
-      ✅ Result count "52 results"
-      ✅ NEW: Listing cards show verified-seller badge (13 found), "X sold" (12 found), and low-stock "Only N left" badges (4 found)
-      ✅ Search works (Binance → 1 result, Clear → 52)
-      ✅ Category filtering works (Gaming → 4 results, Clear → 52)
-      ✅ Sort dropdown works (Price: Low to High shows "Quote", High to Low shows "$499.00", Top Rated shows "4.9")
-      ✅ Load more works (12 → 24 cards)
+      **NEW PHASE 2 ELEMENTS VERIFIED:**
       
-      **DETAIL PAGE (/accounts/:id) — ALL PASS:**
-      ✅ Breadcrumb present (Accounts Marketplace / Category / Title)
-      ✅ Gradient hero with icon, "Escrow protected" chip
-      ✅ Rating/delivery/stock row
-      ✅ NEW: Social-proof row (X sold, N viewing now, Last sold Xh ago) — all present
-      ✅ NEW: Seller trust card with seller name, verified badge, seller rating, sales count, and stats (Responds ~Xh, Member since, KYC Verified) — all present
-      ✅ Existing "What you get" section with 4 features
-      ✅ NEW: "How escrow protects you" section with 3 steps
-      ✅ NEW: Buyer-guarantees grid with 4 guarantees (Replacement warranty, Money-back protection, Identity-checked sellers, Private secure handover)
-      ✅ NEW: FAQ accordion with 4 items (opens on click)
-      ✅ Purchase card: price, NEW verified-seller + "X sold" chips, delivery/availability/protection rows, "Buy now" button (shows toast), "Contact seller" link, NEW assurance rows (escrow/secure handover/warranty)
-      ✅ "More in Category" related section with 3 cards, navigation works
+      **LANDING PAGE (/accounts):**
+      ✅ (1a) Account-type pills: All 12 listing cards display category name pills (e.g., "Social Media Accounts", "Email Accounts", "AI & Software Accounts", "Gaming Accounts", "Crypto & Web3"). Total 18 pills found across visible cards.
+      ✅ (1b) Green delivery chips: All 12 cards show delivery expectation chips ("1-day delivery" or "2-day delivery"). Found 12 delivery chips (8 × 1-day, 4 × 2-day).
+      ✅ (1c) Key benefit with check icon: Visible on listing cards below the pills.
+      ✅ (2) PHASE 1 elements still present: Social-proof stats bar (4 stats: 12,400+ Accounts delivered, 4.9/5 Average buyer rating, 100% Escrow protected, 1-2 days Typical handover), verified-seller badges, 'X sold' indicators (12 found), low-stock 'Only N left' badges (4 found), rating, price, escrow chips.
+      ✅ (3) Core functionality intact: Search (Binance → 1 result, Clear → 52), category filter (Gaming → 4 results, Clear → 52), sort dropdown (Price: Low/High, Top Rated), Load more (12 → 24 cards).
       
-      **MOBILE (390x844) — ALL PASS:**
-      ✅ Landing page renders correctly (hero, stats bar with 4 items, 13 categories, 12 listing cards)
-      ✅ Detail page renders correctly (breadcrumb, hero icon, social-proof row, seller trust card, escrow section, buyer-guarantees, FAQ, purchase card)
+      **IMPROVED EMPTY STATE:**
+      ✅ (4) Contextual heading: Navigated to /accounts?q=zzzznotfound. Empty state heading includes query text "zzzznotfound".
+      ✅ (4) Guidance text: "Try removing a filter, checking your spelling, or browse a popular category below" present.
+      ✅ (4) Category recovery chips: 6 clickable category chips present (Social Media Accounts, Email Accounts, Advertising Accounts, Payment & Finance Accounts, Crypto & Web3, E-commerce Accounts).
+      ✅ (4) Recovery chip functionality: Clicked "Social Media Accounts" chip → filtered to Social Media category correctly.
+      ✅ (4) "Clear search" button: Present and functional.
+      ✅ (4) "Browse all accounts" button: Present and resets to 52 results.
+      ✅ (5) Empty state within category: Navigated to /accounts?category=gaming&q=zzzznotfound. Heading shows "Gaming Accounts" (mentions both query and category).
+      
+      **DETAIL PAGE (/accounts/:id):**
+      ✅ (6) NEW "At a glance" block: Present BEFORE "What you get" section. All 8 comparison-friendly quick-facts rows verified:
+         • Account type ✓
+         • Price ✓
+         • Delivery time ✓
+         • Availability ✓
+         • Ownership ✓
+         • Warranty ✓
+         • Buyer protection ✓
+         • Seller rating ✓
+      ✅ (7) PHASE 1 elements still present: Breadcrumb (Accounts Marketplace / Category / Title), gradient hero with icon, "Escrow protected" chip, rating/delivery/stock row, social-proof row (X sold, N viewing now, Last sold Xh ago), seller trust card (seller name, verified badge, seller rating, sales count, Responds ~Xh, Member since, KYC Verified), "What you get" section (4 features), "How escrow protects you" 3-step section, buyer-guarantees grid (4 items: Replacement warranty, Money-back protection, Identity-checked sellers, Private secure handover), FAQ accordion (4 items, opens on click), purchase card (price, verified-seller + sold chips, delivery/availability/protection rows, "Buy now" button shows toast, "Contact seller" link, assurance rows: escrow/secure handover/warranty), "More in Category" related listings section (navigation works).
+      
+      **MOBILE (390x844):**
+      ✅ All Phase 2 elements render correctly: Hero, social-proof stats bar, 13 category cards, listing cards with account-type pills + delivery chips, "At a glance" section on detail page, all Phase 1 elements intact.
       
       **CONSOLE & NETWORK:**
-      ✅ No console errors
-      ⚠️ Minor: 2 Cloudflare RUM (cdn-cgi/rum) network requests failed — non-critical CDN analytics, does not affect functionality
+      ✅ No console errors detected.
+      ⚠️ Minor: Cloudflare RUM (cdn-cgi/rum) CDN analytics requests fail — non-critical, does not affect functionality.
       
       **CONCLUSION:**
-      NOTHING regressed. All NEW premium/trust elements present and working perfectly. Core functionality (search, filter, sort, load more, navigation) intact. All 24 tests passed.
+      NOTHING regressed. ALL Phase 2 elements present and working perfectly. Core functionality (search, filter, sort, load more, navigation) intact. All 7 test requirements passed on both desktop and mobile viewports.

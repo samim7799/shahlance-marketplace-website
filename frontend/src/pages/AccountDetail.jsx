@@ -4,7 +4,7 @@ import * as Icons from 'lucide-react';
 import {
   ArrowLeft, ChevronRight, Star, Clock, ShieldCheck, CheckCircle2, Package,
   BadgeCheck, Zap, Store, MessageCircle, Lock, Users, ShoppingCart, HelpCircle,
-  Timer, CalendarDays, TrendingUp,
+  Timer, CalendarDays, TrendingUp, ListChecks,
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -138,6 +138,21 @@ export default function AccountDetail() {
               </div>
             </div>
 
+
+            {/* At a glance — comparison-friendly quick facts */}
+            <div className="mt-8 card-surface rounded-2xl p-5 sm:p-6">
+              <h2 className="text-base font-bold text-white flex items-center gap-2"><ListChecks size={16} className="text-emerald-400" /> At a glance</h2>
+              <dl className="mt-4 grid gap-x-8 sm:grid-cols-2">
+                <FactRow label="Account type" value={category?.name} />
+                <FactRow label="Price" value={listing.price === 0 ? 'Custom quote' : `$${listing.price.toFixed(2)} ${listing.priceLabel}`} />
+                <FactRow label="Delivery time" value={`${listing.deliveryDays} day(s)`} />
+                <FactRow label="Availability" value={`${listing.stock} in stock`} />
+                <FactRow label="Ownership" value={features[0]} />
+                <FactRow label="Warranty" value="Replacement included" />
+                <FactRow label="Buyer protection" value="Escrow protected" />
+                <FactRow label="Seller rating" value={`${seller.rating.toFixed(1)} / 5 · ${seller.sales.toLocaleString()} sales`} />
+              </dl>
+            </div>
 
             {/* What you get */}
             <div className="mt-8 card-surface rounded-2xl p-5 sm:p-6">
@@ -287,6 +302,15 @@ function Row({ Icon, label, value }) {
     <div className="flex items-center justify-between">
       <span className="inline-flex items-center gap-2 text-slate-400"><Icon size={15} /> {label}</span>
       <span className="text-slate-200 font-medium">{value}</span>
+    </div>
+  );
+}
+
+function FactRow({ label, value }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-2.5 border-b border-white/5">
+      <dt className="text-sm text-slate-400 shrink-0">{label}</dt>
+      <dd className="text-sm text-slate-100 font-medium text-right">{value}</dd>
     </div>
   );
 }
