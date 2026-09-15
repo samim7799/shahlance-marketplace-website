@@ -4,14 +4,14 @@ import * as Icons from 'lucide-react';
 import {
   ArrowLeft, ChevronRight, Star, Clock, ShieldCheck, CheckCircle2, Package,
   BadgeCheck, Zap, Store, MessageCircle, Lock, Users, ShoppingCart, HelpCircle,
-  Timer, CalendarDays, TrendingUp, ListChecks,
+  Timer, CalendarDays, TrendingUp, ListChecks, Info, Compass,
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { useToast } from '../hooks/use-toast';
 import {
-  getAccountListing, getAccountCategory, getListingFeatures, ACCOUNT_LISTINGS,
+  getAccountListing, getAccountCategory, getListingFeatures, ACCOUNT_LISTINGS, ACCOUNT_CATEGORIES,
   getSellerMeta, getListingStats, ACCOUNTS_ESCROW_STEPS, ACCOUNTS_GUARANTEES, ACCOUNTS_FAQ,
 } from '../mock/accountsData';
 
@@ -24,6 +24,15 @@ export default function AccountDetail() {
   const related = useMemo(() => {
     if (!listing) return [];
     return ACCOUNT_LISTINGS.filter((l) => l.category === listing.category && l.id !== listing.id).slice(0, 4);
+  }, [listing]);
+
+  const alsoLike = useMemo(() => {
+    if (!listing) return [];
+    return ACCOUNT_LISTINGS
+      .filter((l) => l.category !== listing.category)
+      .slice()
+      .sort((a, b) => b.rating - a.rating || b.reviews - a.reviews)
+      .slice(0, 4);
   }, [listing]);
 
   if (!listing) {
@@ -111,7 +120,10 @@ export default function AccountDetail() {
               )}
             </div>
 
-            <p className="mt-5 text-sm sm:text-base text-slate-300 leading-relaxed">{listing.description}</p>
+            <div className="mt-6">
+              <h2 className="text-base font-bold text-white flex items-center gap-2"><Info size={16} className="text-emerald-400" /> Overview</h2>
+              <p className="mt-2 text-sm sm:text-base text-slate-300 leading-relaxed">{listing.description}</p>
+            </div>
 
             {/* Seller trust card */}
             <div className="mt-6 card-surface rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -226,7 +238,7 @@ export default function AccountDetail() {
           </div>
 
           {/* RIGHT — purchase card */}
-          <aside>
+          <aside className="order-first lg:order-none">
             <div className="lg:sticky lg:top-24 card-surface rounded-2xl p-5 sm:p-6">
               <div className="flex items-baseline justify-between">
                 <span className="text-xs uppercase tracking-wider text-slate-500">{listing.priceLabel}</span>
@@ -290,6 +302,58 @@ export default function AccountDetail() {
             </div>
           </section>
         )}
+
+        {/* You may also like — cross-category discovery */}
+        {alsoLike.length > 0 && (
+          <section className="mt-12">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">You may also like</h2>
+              <Link to="/accounts" className="text-sm text-emerald-400 hover:text-emerald-300 btn-hover inline-flex items-center gap-1">
+                Explore all <ChevronRight size={14} />
+              </Link>
+            </div>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {alsoLike.map((r) => {
+                const RIcon = Icons[r.icon] || Icons.Package;
+                return (
+                  <Link key={r.id} to={`/accounts/${r.id}`} className="group card-surface card-hover rounded-2xl overflow-hidden flex flex-col">
+                    <div className={`relative aspect-[16/10] bg-gradient-to-br ${r.color} flex items-center justify-center`}>
+                      <RIcon className="h-12 w-12 text-white drop-shadow-lg" strokeWidth={1.6} />
+                      <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur px-2 py-0.5 text-[10px] font-medium text-emerald-300 border border-emerald-400/30"><Star size={9} className="fill-amber-400 text-amber-400" /> {r.rating.toFixed(1)}</span>
+                    </div>
+                    <div className="p-4 flex flex-col gap-2 flex-1">
+                      <span className="text-[10px] text-slate-500">{(getAccountCategory(r.category) || {}).name}</span>
+                      <h3 className="text-sm font-semibold text-white leading-snug clamp-2 group-hover:text-emerald-300 btn-hover">{r.title}</h3>
+                      <div className="mt-auto pt-2 flex items-baseline justify-between border-t border-white/5">
+                        <span className="text-[11px] uppercase tracking-wider text-slate-500">{r.priceLabel}</span>
+                        <span className="text-base font-bold text-white">{r.price === 0 ? 'Quote' : `$${r.price.toFixed(2)}`}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Explore more categories */}
+        <section className="mt-12">
+          <h2 className="text-base font-bold text-white flex items-center gap-2"><Compass size={16} className="text-emerald-400" /> Explore more account categories</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {ACCOUNT_CATEGORIES.filter((c) => c.id !== listing.category).map((c) => {
+              const CIcon = Icons[c.icon] || Icons.Box;
+              return (
+                <Link
+                  key={c.id}
+                  to={`/accounts?category=${c.id}`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-emerald-500/30 px-3 py-1.5 text-xs text-slate-300 btn-hover"
+                >
+                  <CIcon size={12} className="text-emerald-400" /> {c.name}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
       </main>
 
       <Footer />

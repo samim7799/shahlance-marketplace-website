@@ -8,7 +8,7 @@ import {
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { ACCOUNT_CATEGORIES, ACCOUNT_LISTINGS, ACCOUNTS_MARKETPLACE_STATS, getListingStats, getAccountCategory, getListingFeatures } from '../mock/accountsData';
+import { ACCOUNT_CATEGORIES, ACCOUNT_LISTINGS, ACCOUNTS_MARKETPLACE_STATS, getListingStats, getAccountCategory, getListingFeatures, getSellerMeta } from '../mock/accountsData';
 
 const SORTS = [
   { id: 'popular', label: 'Most Popular' },
@@ -169,7 +169,7 @@ export default function AccountsMarketplace() {
                 <button
                   key={c.id}
                   onClick={() => pickCategory(c.id)}
-                  className={`group flex items-center gap-3 rounded-2xl border p-3.5 text-left btn-hover ${
+                  className={`group flex items-start gap-3 rounded-2xl border p-3.5 text-left btn-hover ${
                     active
                       ? 'border-emerald-500/50 bg-emerald-500/10'
                       : 'border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-emerald-500/30'
@@ -181,6 +181,7 @@ export default function AccountsMarketplace() {
                   <div className="min-w-0">
                     <span className="block text-xs font-semibold text-slate-100 leading-tight truncate group-hover:text-white">{c.name}</span>
                     <span className="text-[11px] text-slate-500">{countFor(c.id)} listings</span>
+                    <span className="hidden lg:block text-[11px] text-slate-500 leading-snug clamp-2 mt-1">{c.blurb}</span>
                   </div>
                 </button>
               );
@@ -216,6 +217,9 @@ export default function AccountsMarketplace() {
             </label>
           </div>
         </div>
+        {activeCat !== 'all' && activeCatMeta?.blurb && (
+          <p className="mt-2 text-sm text-slate-400 max-w-2xl">{activeCatMeta.blurb}</p>
+        )}
       </section>
 
       {/* LISTINGS */}
@@ -281,6 +285,7 @@ export default function AccountsMarketplace() {
 function AccountCard({ listing }) {
   const Icon = Icons[listing.icon] || Icons.Package;
   const stats = getListingStats(listing);
+  const sellerMeta = getSellerMeta(listing);
   const typeName = (getAccountCategory(listing.category) || {}).name || 'Account';
   const topBenefit = (getListingFeatures(listing) || [])[0];
   return (
@@ -312,6 +317,9 @@ function AccountCard({ listing }) {
           </span>
           <span className="text-xs text-slate-300 font-medium truncate">{listing.seller}</span>
           <BadgeCheck size={13} className="text-emerald-400 shrink-0" />
+          <span className="ml-auto inline-flex items-center gap-0.5 text-[11px] text-slate-400 shrink-0" title="Seller rating">
+            <Star size={11} className="text-amber-400 fill-amber-400" /> {sellerMeta.rating.toFixed(1)}
+          </span>
         </div>
         <h3 className="text-sm sm:text-[15px] font-semibold text-white leading-snug clamp-2 group-hover:text-emerald-300 btn-hover">
           {listing.title}

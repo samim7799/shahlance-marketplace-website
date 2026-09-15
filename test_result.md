@@ -141,6 +141,12 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
+        comment: "PHASE 3 lightweight premium enhancement (additive, Accounts files only: AccountsMarketplace.jsx, AccountDetail.jsx). (1) Landing category discovery: category cards now show the category blurb (lg+), and a context blurb appears under the results header when a category is active. (2) Card trust: added a seller-rating chip (getSellerMeta) to each listing card. (3) Detail readability: description wrapped in an 'Overview' section heading. (4) Stronger discovery: cross-category 'You may also like' (top-rated) section + 'Explore more account categories' chip strip, using existing listings/categories only. (5) Mobile: detail purchase card now surfaces first on mobile (order-first lg:order-none). No backend/API/DB/checkout/orders/auth changes. Needs UI retest."
+      - working: true
+        agent: "testing"
+        comment: "PASS (Phase 3) — 10/10 items on desktop + mobile. Landing: category-card blurbs (lg), active-category context blurb, seller-rating chip on all cards; no regressions. Detail: 'Overview' heading, 'You may also like' 4 cross-category top-rated cards (navigate ok), 'Explore more account categories' 12 chips (navigate to /accounts?category=), all Phase 1/2 sections intact. Mobile: purchase card renders above content (Y 154 vs Overview 1086), no overflow at 390px. No console errors."
+      - working: "NA"
+        agent: "main"
         comment: "PHASE 2 buyer-experience enhancement (additive, Accounts files only: AccountsMarketplace.jsx, AccountDetail.jsx). (1) Listing cards now show an account-type pill (category), a delivery-expectation chip ('N-day delivery'), and a one-line key benefit (getListingFeatures[0]). (2) Detail page gained an 'At a glance' comparison-friendly quick-facts block (account type, price, delivery time, availability, ownership, warranty, buyer protection, seller rating) placed before 'What you get' to sharpen the buyer decision hierarchy. (3) Empty state is now contextual (shows the query/active category), offers 6 recovery category chips, and clearer Clear search / Browse all actions. Uses existing data/helpers only; no backend/API/DB/checkout/orders/auth changes. Needs UI retest."
       - working: true
         agent: "testing"
@@ -163,6 +169,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "PASS — PHASE 2 additive UI improvements verified. Comprehensive testing on desktop (1440x900) and mobile (390x844). LANDING (/accounts): ✅ NEW PHASE 2: (1a) Account-type pills showing category names on all 12 cards (e.g., 'Social Media Accounts', 'Email Accounts', 'AI & Software Accounts'). (1b) Green delivery chips showing '1-day delivery' or '2-day delivery' on all 12 cards. (1c) Key benefit with check icon visible on cards. ✅ PHASE 1 elements still present: social-proof stats bar (4 stats), verified-seller badges, 'X sold' indicators (12 found), low-stock 'Only N left' badges (4 found). ✅ Core functionality intact: search (Binance->1 result, Clear->52), category filter (Gaming->4 results, Clear->52), sort dropdown, load more (12->24 cards). IMPROVED EMPTY STATE: ✅ NEW PHASE 2: (4) Contextual heading includes query text 'zzzznotfound'. (4) Guidance text 'Try removing a filter' present. (4) 6 clickable category recovery chips present (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce). (4) 'Clear search' button present. (4) 'Browse all accounts' button present. (5) Recovery chip click filters to category correctly. (5) Empty state within category shows both query and category name in heading. DETAIL (/accounts/:id): ✅ NEW PHASE 2: (6) 'At a glance' block present BEFORE 'What you get' section with all 8 comparison-friendly quick-facts rows: Account type, Price, Delivery time, Availability, Ownership, Warranty, Buyer protection, Seller rating. ✅ PHASE 1 elements still present: (7) Breadcrumb, gradient hero, escrow chip, rating/delivery/stock row, social-proof row (sold/viewing/last sold), seller trust card (verified/rating/sales/responds/member-since/KYC), 'What you get' section, 'How escrow protects you' 3-step, buyer-guarantees grid (4 items), FAQ accordion (opens on click), purchase card (Buy now shows toast, Contact seller link), verified-seller + sold chips, assurance rows, related listings navigation. MOBILE (390x844): ✅ All Phase 2 elements render correctly on mobile. CONSOLE: ✅ No errors. Minor: Cloudflare RUM CDN analytics requests fail (non-critical). NOTHING regressed. ALL Phase 2 elements present and working perfectly."
+      - working: true
+        agent: "testing"
+        comment: "PASS — PHASE 3 additive UI improvements verified. Comprehensive testing on desktop (1440x900) and mobile (390x844). LANDING (/accounts) DESKTOP: ✅ NEW PHASE 3: (1) Category grid cards show short blurb/description line under 'N listings' count at desktop/lg width (verified on first 5 categories, e.g., 'Aged & verified Instagram, TikTok, X and Facebook profiles'). (2) Context blurb paragraph appears under results header when category is selected (tested with 'Crypto & Web3' → 'KYC-verified exchange accounts and aged wallets'). (3) Listing cards show SELLER RATING chip (small star + number) on right side of seller row (verified on all 12 visible cards). ✅ NO REGRESSIONS: (4) All Phase 1 & Phase 2 elements intact: stats bar (12,400+ Accounts delivered, 4.9/5 rating, 100% Escrow, 1-2 days handover), 13 verified-seller badges, 12 'X sold' indicators, 4 low-stock badges, 12 delivery chips, account-type pills, key benefit lines. Search (Stripe→1 result), category filter (Gaming→4 results, Clear→52), sort (price-asc/desc), load more (12→24 cards), contextual empty state all working. DETAIL (/accounts/:id): ✅ NEW PHASE 3: (5) Description sits under 'Overview' section heading with Info icon. (6) 'You may also like' section appears after 'More in <Category>' showing 4 cross-category top-rated listings (ChatGPT Plus, Aged Gmail, Fortnite, Shopify Store), each with category label (AI & Software Accounts, Email Accounts, Gaming Accounts, E-commerce Accounts) and rating badge (star + number on card). Clicking navigates to detail page. (7) 'Explore more account categories' chip strip with 12 category chips (all categories except current one); clicking chip navigates to /accounts?category=<id> and shows that category (tested with 'Email Accounts'). ✅ NO REGRESSIONS: (8) All Phase 1 & Phase 2 detail elements intact: breadcrumb, hero, social-proof row (sold/viewing/last sold), seller trust card (verified/rating/sales/responds/member-since/KYC), 'At a glance' block (8 quick-facts), 'What you get' (4 features), 'How escrow protects you' (3 steps), buyer-guarantees grid (4 items), FAQ accordion (opens on click), purchase card (Buy now shows toast 'Reserved via escrow', Contact seller link), verified-seller + sold chips, assurance rows, 'More in <Category>' related (4 cards, navigation works). MOBILE (390x844): ✅ NEW PHASE 3: (9) Purchase card (price + Buy now) appears ABOVE long content sections (purchase card Y: 154, Overview Y: 1086) — not buried at bottom. (10) Landing and detail render cleanly on mobile with no overflow/broken layout (body width: 390px = viewport width). CONSOLE: ✅ No critical console errors. Minor: Cloudflare RUM CDN analytics requests fail (non-critical). ALL 10 Phase 3 test items PASS. NOTHING regressed from Phase 1 or Phase 2."
 
   - task: "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
     implemented: true
@@ -522,6 +531,29 @@ agent_communication:
          - Old password correctly rejected
       
       **No console errors detected. All role-aware menu logic, admin card gating, password change validations, and preferences persistence working correctly.**
+
+  - agent: "testing"
+    message: |
+      ✅ PHASE 3 ACCOUNTS MARKETPLACE TESTING COMPLETE — ALL 10 TESTS PASSED
+      
+      Tested ONLY the ShahLance Accounts Marketplace Phase 3 additive UI improvements (/accounts and /accounts/:id). Base URL: https://shahcode-review.preview.emergentagent.com. NO code modifications made.
+      
+      **SUMMARY:**
+      
+      ✅ 1. Category grid cards show blurbs at desktop/lg width — VERIFIED (e.g., "Aged & verified Instagram, TikTok, X and Facebook profiles")
+      ✅ 2. Context blurb appears under results header when category selected — VERIFIED (tested with Crypto & Web3: "KYC-verified exchange accounts and aged wallets")
+      ✅ 3. Seller rating chip on listing cards — VERIFIED (small star + number on right side of seller row, all 12 cards)
+      ✅ 4. NO regressions on landing page — VERIFIED (stats bar, verified-seller badges, X sold, low-stock badges, delivery chips, search, filter, sort, load more all working)
+      ✅ 5. Description under "Overview" section heading — VERIFIED (Info icon + heading present)
+      ✅ 6. "You may also like" cross-category section — VERIFIED (4 listings: ChatGPT Plus, Aged Gmail, Fortnite, Shopify Store; each with category label and rating badge; navigation works)
+      ✅ 7. "Explore more account categories" chip strip — VERIFIED (12 category chips, clicking navigates to /accounts?category=<id>)
+      ✅ 8. NO regressions on detail page — VERIFIED (breadcrumb, hero, social-proof row, seller trust card, At a glance, What you get, How escrow protects you, buyer-guarantees, FAQ accordion, purchase card, Contact seller, More in Category all intact; Buy now shows toast)
+      ✅ 9. Purchase card appears ABOVE content on mobile — VERIFIED (purchase card Y: 154, Overview Y: 1086)
+      ✅ 10. Clean mobile rendering — VERIFIED (landing and detail body width: 390px = viewport width, no overflow)
+      
+      **CONSOLE:** No critical errors. Minor: Cloudflare RUM CDN analytics requests fail (non-critical).
+      
+      **CONCLUSION:** ALL Phase 3 elements implemented correctly. NOTHING regressed from Phase 1 or Phase 2. Ready to summarize and finish.
 
   - agent: "testing"
     message: |
