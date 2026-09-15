@@ -131,6 +131,23 @@ backend:
         comment: "PASS - All 10 backend auth endpoint tests passed. ✅ POST /api/auth/change-password: (1) Wrong current password returns 400 with correct error message. (2) Short password (<8 chars) returns 400. (3) Same password returns 400. (4) Valid password change returns {ok:true}, login with new password succeeds, login with old password fails with 400. (5) No Authorization header returns 401. ✅ PUT /api/auth/me: (6) Preferences (currency:EUR, language:Français, email.marketing:true) persist correctly. (7) GET /api/auth/me confirms persistence. ✅ Security: (8) Attempting to set role:admin via PUT /api/auth/me is correctly blocked by allowlist - role remains 'buyer'. All validation, authentication, and security checks working as expected."
 
 frontend:
+  - task: "Digital Marketplace — Phase 5 accessibility & consistency polish"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/Marketplace.jsx, /app/frontend/src/pages/ProductDetail.jsx, /app/frontend/src/components/ProductCard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Phase 5 final polish — additive accessibility attributes only, no layout/visual/logic changes (Marketplace.jsx, ProductDetail.jsx, ProductCard.jsx). (1) Marketplace search input now has aria-label + id; sort <select> has aria-label='Sort products'. (2) Category quick-picker buttons have aria-pressed (toggle state) + descriptive aria-label. (3) Repeated card CTAs now have distinguishing aria-labels ('View details for <title>' / 'Buy <title> now') so screen readers differentiate them. (4) Decorative gradient icons on ProductCard, ProductDetail hero, and the sort/chevron icons marked aria-hidden. No backend/checkout/payment/orders/DB/auth/Accounts changes. Needs UI retest (verify no regressions to search/filter/sort/nav on desktop + mobile)."
+      - working: true
+        agent: "testing"
+        comment: "PASS — desktop + mobile. Verified: search aria-label present + filters; sort aria-label + reorders; category buttons aria-pressed toggles + aria-label + filter/reset work; card CTAs distinguishing aria-labels + navigate; decorative icons aria-hidden; seller avatar meaningful alt. No regressions across marketplace (skeleton, empty+reset, load more) and detail (trust chips, price card, toasts, related). Mobile price card above description (Y353 vs Y1238), no overflow, no console errors."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Phase 5 accessibility & consistency polish verified on desktop (1440x900) and mobile (390x844). ALL 8 test items confirmed: ACCESSIBILITY (/marketplace): ✅ (1) Search input has aria-label='Search digital marketplace products', is reachable/typable, and filters results correctly (URL updates to q=Gmail). ✅ (2) Sort select has aria-label='Sort products', sort icon marked aria-hidden='true', and changing sort reorders products (tested Price: Low to High, first product $2.75). ✅ (3) Category buttons (15 found) have aria-pressed attribute reflecting active state (false before click, true after click on selected category), aria-label='Filter by <Category>' (e.g., 'Filter by Gift Cards'), clicking filters results (1 result for Gift Cards), and 'All categories' resets filter. ✅ (4) Product card CTAs have distinguishing aria-labels: 'View details for <product title>' and 'Buy <product title> now', both navigate to /product/:id correctly. ACCESSIBILITY (/product/p-001): ✅ (5) Decorative product icon marked aria-hidden='true', seller avatar has meaningful alt text (e.g., 'Isabella Rossi'). REGRESSION (/marketplace): ✅ (6) Hero heading present, search input functional, category picker section with 'Browse categories', sort dropdown, product grid (19 cards initially, 12 View Details + 12 Buy Now buttons visible), Load more button present, empty state shows on nonsense search 'zzzznotfound999' with 'Reset filters' button that restores 19 cards. REGRESSION (/product/p-001): ✅ (7) Breadcrumb, Back button, media hero, title 'Aged Gmail Accounts (2018-2020) Bulk Pack', rating (4.9 with 512 reviews) and 2-day delivery, trust chip row (9 chips: Bestseller, Verified seller, Escrow protected, 1240 sales), 'About this service' section, 'WHAT'S INCLUDED' section with 4 features (Escrow protected payment, 30-day support, Instant delivery, Money-back guarantee), Tags section (#gmail, #accounts, #email, #aged), price card with 'Continue — $4.50' button (shows toast), Save/Share buttons, Seller card with 'Contact seller' button (shows toast), Related services section with 4 cards. MOBILE (390x844): ✅ (8) No horizontal overflow on /marketplace (body width: 390px) or /product/p-001 (body width: 390px), hero renders on mobile, price card appears ABOVE 'About this service' on mobile (price Y: 353, about Y: 1238). CONSOLE: ✅ No console errors detected. ALL Phase 5 accessibility attributes present and functional. NOTHING regressed. All existing functionality intact on desktop and mobile."
   - task: "Digital Marketplace — buyer UX (loading skeleton, detail trust chips, mobile CTA ordering)"
     implemented: true
     working: true
@@ -323,6 +340,25 @@ test_plan:
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "testing"
+    message: |
+      ✅ PHASE 5 ACCESSIBILITY & CONSISTENCY POLISH — ALL TESTS PASSED
+      
+      Tested ONLY the general marketplace (/marketplace) and product detail (/product/:id) as requested. Did NOT test Accounts section. Did NOT modify code. Base URL: https://shahcode-review.preview.emergentagent.com
+      
+      **SUMMARY:**
+      ✅ 1. Search input aria-label — PASS (present, functional)
+      ✅ 2. Sort control aria-label — PASS (present, functional, icon aria-hidden)
+      ✅ 3. Category buttons aria-pressed + aria-label — PASS (toggle state working, filters correctly)
+      ✅ 4. Product card CTA aria-labels — PASS (distinguishing labels, both navigate correctly)
+      ✅ 5. Decorative icons aria-hidden — PASS (product icon, sort icon)
+      ✅ 6. Seller avatar alt text — PASS (meaningful alt text present)
+      ✅ 7. Marketplace regression — PASS (hero, search, category picker, sort, grid, Load more, empty state + Reset)
+      ✅ 8. Product detail regression — PASS (breadcrumb, back, media, title, rating/delivery/category, trust chips, About, What's included, tags, price card, Save/Share, seller, Related services)
+      ✅ 9. Mobile viewport — PASS (no horizontal overflow, price card above description)
+      ✅ 10. Console errors — PASS (no errors detected)
+      
+      **CONCLUSION:** All Phase 5 accessibility attributes are present and functional. Nothing regressed. Desktop (1440x900) and mobile (390x844) both working perfectly.
   - agent: "main"
     message: |
       Verify ShahLance Accounts Marketplace Phase 2 additive UI improvements. Test ONLY the Accounts section (public, no login). Do NOT modify code. Base URL from /app/frontend/.env. Routes: /accounts and /accounts/:id. Confirm the NEW Phase 2 elements render AND nothing from before regressed. Report ONLY issues if found; otherwise confirm pass.

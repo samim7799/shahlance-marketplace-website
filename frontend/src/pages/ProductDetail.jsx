@@ -64,7 +64,7 @@ export default function ProductDetail() {
           <div>
             <div className={`relative aspect-[16/10] rounded-3xl bg-gradient-to-br ${product.color} overflow-hidden shadow-2xl shadow-black/40 flex items-center justify-center`}>
               <div className="absolute inset-0 bg-[radial-gradient(600px_200px_at_50%_-50%,rgba(255,255,255,0.25),transparent)]" />
-              <Icon className="h-28 w-28 sm:h-36 sm:w-36 text-white drop-shadow-2xl" strokeWidth={1.4} />
+              <Icon className="h-28 w-28 sm:h-36 sm:w-36 text-white drop-shadow-2xl" strokeWidth={1.4} aria-hidden="true" />
               {product.badge && (
                 <span className="absolute top-4 left-4 rounded-full bg-black/40 backdrop-blur px-3 py-1.5 text-xs font-semibold text-white border border-white/20">
                   {product.badge}

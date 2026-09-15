@@ -111,6 +111,8 @@ export default function Marketplace() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search products — 'Gmail', 'Telegram', 'Nitro'..."
+                aria-label="Search digital marketplace products"
+                id="marketplace-search"
                 className="flex-1 bg-transparent outline-none text-sm sm:text-base text-slate-100 placeholder:text-slate-500 py-2"
               />
               {q && (
@@ -161,6 +163,8 @@ export default function Marketplace() {
               <button
                 key={c.id}
                 onClick={() => (c.id === 'accounts' ? navigate('/accounts') : pickCategory(c.id))}
+                aria-pressed={activeCat === c.id}
+                aria-label={`Filter by ${c.name}`}
                 className={`group flex flex-col items-center gap-2 rounded-2xl border p-4 btn-hover ${
                   activeCat === c.id
                     ? 'border-emerald-500/50 bg-emerald-500/10'
@@ -197,8 +201,8 @@ export default function Marketplace() {
           </div>
           <div className="flex items-center gap-2">
             <label className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 pl-3 pr-2 h-9">
-              <ArrowUpDown size={13} className="text-slate-400" />
-              <select value={sort} onChange={(e) => setSort(e.target.value)} className="bg-transparent outline-none text-sm text-slate-200" style={{ colorScheme: 'dark' }}>
+              <ArrowUpDown size={13} className="text-slate-400" aria-hidden="true" />
+              <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort products" className="bg-transparent outline-none text-sm text-slate-200" style={{ colorScheme: 'dark' }}>
                 {SORTS.map((s) => <option key={s.id} value={s.id} className="bg-[#0f1526]">{s.label}</option>)}
               </select>
             </label>
@@ -270,12 +274,14 @@ function MarketplaceProductCard({ product }) {
       <div className="mt-2 grid grid-cols-2 gap-2">
         <Link
           to={`/product/${product.id}`}
+          aria-label={`View details for ${product.title}`}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white text-xs font-semibold py-2 btn-hover"
         >
-          View Details <ChevronRight size={12} />
+          View Details <ChevronRight size={12} aria-hidden="true" />
         </Link>
         <Link
           to={`/product/${product.id}`}
+          aria-label={`Buy ${product.title} now`}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-semibold py-2 btn-hover"
         >
           Buy Now

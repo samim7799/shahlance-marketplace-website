@@ -12,7 +12,7 @@ export default function ProductCard({ product }) {
       {/* Thumbnail */}
       <div className={`relative aspect-[16/10] bg-gradient-to-br ${product.color} flex items-center justify-center`}>
         <div className="absolute inset-0 bg-[radial-gradient(600px_200px_at_50%_-50%,rgba(255,255,255,0.2),transparent)]" />
-        <Icon className="h-14 w-14 text-white drop-shadow-lg" strokeWidth={1.6} />
+        <Icon className="h-14 w-14 text-white drop-shadow-lg" strokeWidth={1.6} aria-hidden="true" />
         {product.badge && (
           <span className="absolute top-3 left-3 rounded-full bg-black/40 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-white border border-white/20">
             {product.badge}
