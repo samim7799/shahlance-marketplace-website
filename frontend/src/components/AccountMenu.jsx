@@ -13,21 +13,31 @@ export default function AccountMenu() {
   const { unread } = useNotifications();
   const navigate = useNavigate();
 
-  // Compute the "Dashboard" destination based on account type
+  // Compute the "Dashboard" destination based on role / account type
+  const role = user?.role;
+  const accountType = user?.accountType;
   const dashboardTo =
-    user?.accountType === 'client' ? '/dashboard/buyer' : '/dashboard/worker';
+    role === 'admin'
+      ? '/dashboard/admin'
+      : accountType === 'client'
+        ? '/dashboard/buyer'
+        : '/dashboard/worker';
 
+  const isBuyer = role === 'admin' || accountType === 'client' || accountType === 'both';
+  const isSeller = role === 'admin' || accountType === 'freelancer' || accountType === 'both';
+
+  // Role-aware menu: only surface the order views relevant to this account.
   const items = [
     { to: '/profile', label: 'Profile', Icon: User },
     { to: dashboardTo, label: 'Dashboard', Icon: LayoutDashboard, match: '/dashboard' },
     { to: '/services', label: 'Marketplace', Icon: Store },
-    { to: '/dashboard/buyer-orders', label: 'Buyer Orders', Icon: Package },
-    { to: '/dashboard/seller-orders', label: 'Seller Orders', Icon: Package },
-    { to: '/admin/orders', label: 'Admin Orders', Icon: ShieldCheck },
+    isBuyer && { to: '/dashboard/buyer-orders', label: 'Buyer Orders', Icon: Package },
+    isSeller && { to: '/dashboard/seller-orders', label: 'Seller Orders', Icon: Package },
+    role === 'admin' && { to: '/admin/orders', label: 'Admin Orders', Icon: ShieldCheck },
     { to: '/messages', label: 'Messages', Icon: MessageSquare },
     { to: '/notifications', label: 'Notifications', Icon: Bell, badge: unread },
     { to: '/settings', label: 'Settings', Icon: SettingsIcon },
-  ];
+  ].filter(Boolean);
 
   return (
     <div className="card-surface rounded-2xl px-2 py-2 overflow-x-auto">

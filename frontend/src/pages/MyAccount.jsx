@@ -110,6 +110,7 @@ export default function MyAccount() {
             );
           })}
 
+          {user?.role === 'admin' && (
           <Link to="/admin" className="card-surface card-hover rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-violet-500 to-fuchsia-500 px-5 py-3 flex items-center gap-3">
               <div className="h-9 w-9 rounded-lg bg-white/20 flex items-center justify-center"><ShieldCheck className="h-5 w-5 text-white" /></div>
@@ -120,6 +121,7 @@ export default function MyAccount() {
               <ArrowRight size={16} className="text-slate-400" />
             </div>
           </Link>
+          )}
         </div>
 
         {/* Applications + products */}

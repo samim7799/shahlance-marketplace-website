@@ -131,6 +131,18 @@ backend:
         comment: "PASS - All 10 backend auth endpoint tests passed. ✅ POST /api/auth/change-password: (1) Wrong current password returns 400 with correct error message. (2) Short password (<8 chars) returns 400. (3) Same password returns 400. (4) Valid password change returns {ok:true}, login with new password succeeds, login with old password fails with 400. (5) No Authorization header returns 401. ✅ PUT /api/auth/me: (6) Preferences (currency:EUR, language:Français, email.marketing:true) persist correctly. (7) GET /api/auth/me confirms persistence. ✅ Security: (8) Attempting to set role:admin via PUT /api/auth/me is correctly blocked by allowlist - role remains 'buyer'. All validation, authentication, and security checks working as expected."
 
 frontend:
+  - task: "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/AccountMenu.jsx, /app/frontend/src/pages/MyAccount.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed incomplete buyer/seller/admin account flow. AccountMenu was showing every order view to everyone and routed admins to /dashboard/worker. Now role-aware: Dashboard link -> /dashboard/admin for admin, /dashboard/buyer for client, else /dashboard/worker; 'Buyer Orders' only for buyers (client/both/admin), 'Seller Orders' only for sellers (freelancer/both/admin), 'Admin Orders' only for admin. MyAccount 'Admin Panel' card now gated to role==='admin' only (was visible to all). No backend/API/design changes; other account pages untouched."
+
   - task: "Account Management — real password change + persisted preferences (buyer & seller)"
     implemented: true
     working: "NA"
