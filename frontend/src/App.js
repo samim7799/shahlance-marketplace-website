@@ -13,6 +13,8 @@ import FindFreelancers from './pages/FindFreelancers';
 import PostJob from './pages/PostJob';
 import Contact from './pages/Contact';
 import Marketplace from './pages/Marketplace';
+import AccountsMarketplace from './pages/AccountsMarketplace';
+import AccountDetail from './pages/AccountDetail';
 import MyAccount from './pages/MyAccount';
 import BecomeSeller from './pages/BecomeSeller';
 import SellerUpload from './pages/SellerUpload';
@@ -73,6 +75,8 @@ function App() {
             <Route path="/post-job" element={<PostJob />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/accounts" element={<AccountsMarketplace />} />
+            <Route path="/accounts/:id" element={<AccountDetail />} />
             <Route path="/become-seller" element={<BecomeSeller />} />
             <Route
               path="/my-account"

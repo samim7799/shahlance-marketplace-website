@@ -160,7 +160,7 @@ export default function Marketplace() {
             {primaryCats.map((c) => (
               <button
                 key={c.id}
-                onClick={() => pickCategory(c.id)}
+                onClick={() => (c.id === 'accounts' ? navigate('/accounts') : pickCategory(c.id))}
                 className={`group flex flex-col items-center gap-2 rounded-2xl border p-4 btn-hover ${
                   activeCat === c.id
                     ? 'border-emerald-500/50 bg-emerald-500/10'

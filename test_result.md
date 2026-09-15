@@ -131,6 +131,18 @@ backend:
         comment: "PASS - All 10 backend auth endpoint tests passed. ✅ POST /api/auth/change-password: (1) Wrong current password returns 400 with correct error message. (2) Short password (<8 chars) returns 400. (3) Same password returns 400. (4) Valid password change returns {ok:true}, login with new password succeeds, login with old password fails with 400. (5) No Authorization header returns 401. ✅ PUT /api/auth/me: (6) Preferences (currency:EUR, language:Français, email.marketing:true) persist correctly. (7) GET /api/auth/me confirms persistence. ✅ Security: (8) Attempting to set role:admin via PUT /api/auth/me is correctly blocked by allowlist - role remains 'buyer'. All validation, authentication, and security checks working as expected."
 
 frontend:
+  - task: "Accounts Marketplace — buyer-side browsing (landing, 13 categories, search, filter, sort, load-more, detail)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AccountsMarketplace.jsx, /app/frontend/src/pages/AccountDetail.jsx, /app/frontend/src/mock/accountsData.js, /app/frontend/src/App.js, /app/frontend/src/pages/Marketplace.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "New additive buyer-side Accounts Marketplace at /accounts (+ /accounts/:id detail). Self-contained accountsData.js with 13 categories (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce, Gaming, Creator, AI & Software, Website & Digital Assets, Community, Dating & Lifestyle, Others/Custom) and 52 listings. Landing: hero+search, popular chips, 13-category nav grid with per-category counts + All categories, result count, sort (popular/newest/price/rating), category+search filter with Clear, responsive grid, Load more (12/step). Detail: breadcrumb, gradient hero, escrow/category chips, rating/delivery/stock, description, 'What you get' grid, trust boxes, sticky purchase card with placeholder 'Buy now' (toast — checkout intentionally NOT wired) + Contact seller + related listings. Reuses Header/Footer/Button. App.js +2 routes; general Marketplace 'Accounts' card links to /accounts. No backend/product/checkout/payment changes. Screenshots verified landing (52 results, 13 categories) + detail."
+
   - task: "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
     implemented: true
     working: true
