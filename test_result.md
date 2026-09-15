@@ -131,6 +131,23 @@ backend:
         comment: "PASS - All 10 backend auth endpoint tests passed. ✅ POST /api/auth/change-password: (1) Wrong current password returns 400 with correct error message. (2) Short password (<8 chars) returns 400. (3) Same password returns 400. (4) Valid password change returns {ok:true}, login with new password succeeds, login with old password fails with 400. (5) No Authorization header returns 401. ✅ PUT /api/auth/me: (6) Preferences (currency:EUR, language:Français, email.marketing:true) persist correctly. (7) GET /api/auth/me confirms persistence. ✅ Security: (8) Attempting to set role:admin via PUT /api/auth/me is correctly blocked by allowlist - role remains 'buyer'. All validation, authentication, and security checks working as expected."
 
 frontend:
+  - task: "Accounts Marketplace — Phase 7 (16 categories, mobile grid, Social Media page, payment UI prep)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/mock/accountsData.js, /app/frontend/src/pages/AccountsMarketplace.jsx, /app/frontend/src/pages/SocialMediaAccounts.jsx, /app/frontend/src/pages/AccountDetail.jsx, /app/frontend/src/pages/AccountsPayment.jsx, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Phase 7 Accounts-only production prep. (1) Categories updated to EXACTLY 16 with colorful gradient icons; landing grid 4-per-row mobile (grid-cols-4) compact clamp-2 no overflow. (2) NEW /accounts/social-media compact page (mobile-first) with platform filters + cards showing platform logo/title/followers/verified/rating/escrow/price/View. (3) AccountDetail: Add to cart (toast) + Buy now -> /accounts/payment?item=<id> + tighter mobile spacing + focus rings. (4) NEW /accounts/payment UI-ONLY: crypto + manual fiat methods, manual flow (details+copy, QR area, upload screenshot, transaction ID, submit) then exact ShahLance success message. No real gateway/backend/DB/API/checkout-logic/shared-component changes. Needs UI retest."
+      - working: true
+        agent: "testing"
+        comment: "PASS — 32/32 desktop + mobile. 16 categories correct names/icons, grid-cols-4 mobile clamp-2 no overflow, non-social filters in place. Social page navigates from category, 10 platform filters work, 16 compact cards with all required fields, card->detail nav. Detail has Buy now (->payment)/Add to cart (toast)/Contact seller, purchase card order-first on mobile. Payment: order summary, 8 crypto + 6 fiat methods, manual flow (QR/address+copy/upload/txid), validation blocks empty txid, submit shows success message with 'Your payment has been submitted successfully' + 'ShahLance'. No console errors, no horizontal overflow, no regressions."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Phase 7 production prep verified on desktop (1440x900) and mobile (390x844). ALL 32 tests passed (100%). CATEGORIES (/accounts): ✅ (1) EXACTLY 16 categories with correct names (Social Media, Email Accounts, E-commerce, Ads Accounts, AI & Software, Payment Gateway, Crypto & Web3, Dating Accounts, Creator Accounts, Groups & Channels, Web & Digital Assets, Gaming Accounts, Business Accounts, Streaming Accounts, Tools & Services, Others/Custom). ✅ (2) Mobile grid has grid-cols-4 (4 per row at 390px). ✅ (3) Category names have clamp-2 class (no text overflow, wrap to 2 lines). ✅ (4) Non-social categories (Gaming) filter in place (URL updates to ?category=gaming, no navigation). SOCIAL MEDIA PAGE (/accounts/social-media): ✅ (5) Social Media category card navigates to /accounts/social-media (NOT filter in place). ✅ (6) Page title 'Social Media Accounts' displayed. ✅ (7) Platform filters present (All, Instagram, TikTok, YouTube, Facebook, X, LinkedIn, Discord, Telegram, Other). ✅ (8) Results count displayed (16 accounts). ✅ (9) Compact card grid: 16 social media cards displayed, grid-cols-2 on mobile (2 per row). ✅ (10) Platform filter works (TikTok filter narrows list, 'All' resets). ✅ (11) Clicking card navigates to /accounts/:id. PRODUCT DETAIL (/accounts/:id): ✅ (12) THREE clear actions present: 'Buy now', 'Add to cart', 'Contact seller'. ✅ (13) 'Add to cart' shows toast, does NOT navigate (stays on detail page). ✅ (14) 'Buy now' navigates to /accounts/payment?item=<id>. ✅ (15) Mobile: purchase card has order-first class (appears above content). PAYMENT UI (/accounts/payment?item=<id>): ✅ (16) Order summary displayed. ✅ (17) Crypto payment group with 8 methods: Cryptomus [Automatic], USDT TRC20, USDT BEP20, USDT ERC20, USDT TON, USDT Solana, Bitcoin (BTC), Litecoin (LTC). ✅ (18) Manual/Fiat payment group with 6 methods: bKash, Nagad, Bank Transfer, Visa/Card, Alipay, WeChat Pay. ✅ (19) Selecting method (USDT TRC20) reveals manual payment flow: payment details form, QR code area, copy button, upload screenshot control, Transaction ID input, Submit payment button. ✅ (20) Validation: Submit WITHOUT transaction ID stays on payment page (validation prevents submission). ✅ (21) Success flow: Enter transaction ID + submit shows SUCCESS screen. ✅ (22) Success message contains 'Your payment has been submitted successfully' and 'ShahLance'. REGRESSION + QUALITY: ✅ (23) No console errors on any page. ✅ (24) No horizontal overflow on mobile (390px) for /accounts, /accounts/social-media, /accounts/:id, /accounts/payment (all body width = 390px). ✅ (25) Existing features work: hero search, stats bar, sort dropdown, load more button. ALL Phase 7 requirements verified. NOTHING regressed."
   - task: "Digital Marketplace — Phase 6 production readiness (error recovery, focus states, category card fix)"
     implemented: true
     working: true
@@ -357,6 +374,49 @@ test_plan:
   test_priority: "high_first"
 
 agent_communication:
+  - agent: "testing"
+    message: |
+      ✅ PHASE 7 PRODUCTION PREP — ALL TESTS PASSED (32/32)
+      
+      Tested ONLY Accounts section routes as requested: /accounts, /accounts/social-media, /accounts/:id, /accounts/payment. Did NOT test general Digital Marketplace or other modules. Did NOT modify code. Base URL: https://shahcode-review.preview.emergentagent.com. Tested BOTH desktop (1440x900) AND mobile (390x844).
+      
+      **SUMMARY:**
+      ✅ 1. CATEGORIES (/accounts) — PASS (desktop + mobile)
+         • Exactly 16 categories with correct names
+         • Mobile grid: grid-cols-4 (4 per row at 390px)
+         • Category names have clamp-2 (wrap to 2 lines, no overflow)
+         • Non-social categories filter in place (Gaming → ?category=gaming)
+      
+      ✅ 2. SOCIAL MEDIA PAGE (/accounts/social-media) — PASS (desktop + mobile)
+         • Social Media category card navigates to /accounts/social-media
+         • Page title "Social Media Accounts" displayed
+         • Platform filters: All, Instagram, TikTok, YouTube, Facebook, X, LinkedIn, Discord, Telegram, Other
+         • Results count displayed (16 accounts)
+         • Compact card grid: grid-cols-2 on mobile (2 per row), up to 4 on desktop
+         • Each card shows: platform logo, title, followers, verified badge, seller rating, escrow, price, View button
+         • Platform filter works (TikTok narrows list, All resets)
+         • Clicking card navigates to /accounts/:id
+      
+      ✅ 3. PRODUCT DETAIL (/accounts/:id) — PASS (desktop + mobile)
+         • THREE clear actions: "Buy now", "Add to cart", "Contact seller"
+         • "Add to cart" shows toast, does NOT navigate
+         • "Buy now" navigates to /accounts/payment?item=<id>
+         • Mobile: purchase card has order-first class (appears above content)
+      
+      ✅ 4. PAYMENT UI (/accounts/payment?item=<id>) — PASS (desktop + mobile)
+         • Order summary displayed
+         • Crypto methods (8): Cryptomus [Automatic], USDT TRC20, USDT BEP20, USDT ERC20, USDT TON, USDT Solana, Bitcoin (BTC), Litecoin (LTC)
+         • Manual/Fiat methods (6): bKash, Nagad, Bank Transfer, Visa/Card, Alipay, WeChat Pay
+         • Selecting method (USDT TRC20) reveals manual flow: QR code area, payment address with copy button, upload screenshot, Transaction ID input, Submit button
+         • Validation: Submit WITHOUT transaction ID stays on payment page (validation works)
+         • Success flow: Enter transaction ID + submit shows SUCCESS screen with "Your payment has been submitted successfully" and "ShahLance"
+      
+      ✅ 5. REGRESSION + QUALITY — PASS (desktop + mobile)
+         • No console errors on any page
+         • No horizontal overflow on mobile (390px): /accounts, /accounts/social-media, /accounts/:id, /accounts/payment (all body width = 390px)
+         • Existing features work: hero search, stats bar, sort dropdown, load more button
+      
+      **CONCLUSION:** All Phase 7 production prep items verified. Desktop (1440x900) and mobile (390x844) both working perfectly. 32/32 tests passed (100%). No console errors. No horizontal overflow. Nothing regressed.
   - agent: "testing"
     message: |
       ✅ PHASE 6 PRODUCTION READINESS — ALL TESTS PASSED

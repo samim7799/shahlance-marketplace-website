@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import {
   ArrowLeft, ChevronRight, Star, Clock, ShieldCheck, CheckCircle2, Package,
@@ -18,6 +18,7 @@ import {
 export default function AccountDetail() {
   const { id } = useParams();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const listing = getAccountListing(id);
   const category = listing ? getAccountCategory(listing.category) : null;
 
@@ -58,9 +59,13 @@ export default function AccountDetail() {
   const stats = getListingStats(listing);
 
   const buyNow = () => {
+    navigate(`/accounts/payment?item=${listing.id}`);
+  };
+
+  const addToCart = () => {
     toast({
-      title: 'Reserved via escrow',
-      description: 'Secure checkout for account listings is launching soon — contact the seller to complete this purchase.',
+      title: 'Added to cart',
+      description: `${listing.title} is ready for checkout.`,
     });
   };
 
@@ -68,7 +73,7 @@ export default function AccountDetail() {
     <div>
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-1.5 text-xs text-slate-400 flex-wrap">
           <Link to="/accounts" className="hover:text-emerald-400 btn-hover">Accounts Marketplace</Link>
@@ -78,7 +83,7 @@ export default function AccountDetail() {
           <span className="text-slate-300 truncate max-w-[220px]">{listing.title}</span>
         </nav>
 
-        <div className="mt-5 grid gap-8 lg:grid-cols-[1fr_360px]">
+        <div className="mt-5 grid gap-6 lg:gap-8 lg:grid-cols-[1fr_360px]">
           {/* LEFT */}
           <div>
             <div className={`relative rounded-3xl overflow-hidden bg-gradient-to-br ${listing.color} aspect-[16/8] flex items-center justify-center`}>
@@ -257,11 +262,14 @@ export default function AccountDetail() {
                 <Row Icon={ShieldCheck} label="Protection" value="Escrow held" />
               </div>
 
-              <Button onClick={buyNow} className="mt-5 w-full rounded-xl h-12 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold text-base btn-hover">
+              <Button onClick={buyNow} className="mt-5 w-full rounded-xl h-12 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold text-base btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
                 {listing.price === 0 ? 'Request a quote' : 'Buy now'}
               </Button>
-              <Link to="/contact" className="mt-2.5 w-full inline-flex items-center justify-center gap-2 rounded-xl h-11 border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 text-sm font-semibold btn-hover">
-                <MessageCircle size={15} /> Contact seller
+              <button onClick={addToCart} className="mt-2.5 w-full inline-flex items-center justify-center gap-2 rounded-xl h-11 border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-sm font-semibold btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70">
+                <ShoppingCart size={15} aria-hidden="true" /> Add to cart
+              </button>
+              <Link to="/contact" className="mt-2.5 w-full inline-flex items-center justify-center gap-2 rounded-xl h-11 border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 text-sm font-semibold btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70">
+                <MessageCircle size={15} aria-hidden="true" /> Contact seller
               </Link>
               <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
                 <AssureRow Icon={ShieldCheck} text="Escrow protected — released only when you confirm" />

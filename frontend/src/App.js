@@ -14,6 +14,8 @@ import PostJob from './pages/PostJob';
 import Contact from './pages/Contact';
 import Marketplace from './pages/Marketplace';
 import AccountsMarketplace from './pages/AccountsMarketplace';
+import SocialMediaAccounts from './pages/SocialMediaAccounts';
+import AccountsPayment from './pages/AccountsPayment';
 import AccountDetail from './pages/AccountDetail';
 import MyAccount from './pages/MyAccount';
 import BecomeSeller from './pages/BecomeSeller';
@@ -76,6 +78,8 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/accounts" element={<AccountsMarketplace />} />
+            <Route path="/accounts/social-media" element={<SocialMediaAccounts />} />
+            <Route path="/accounts/payment" element={<AccountsPayment />} />
             <Route path="/accounts/:id" element={<AccountDetail />} />
             <Route path="/become-seller" element={<BecomeSeller />} />
             <Route

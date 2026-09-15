@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import {
   Search, ArrowUpDown, ShieldCheck, Sparkles, Store, X, Grid3x3, Star, Clock,
@@ -22,6 +22,7 @@ const POPULAR = ['Instagram', 'Gmail', 'Stripe', 'Binance', 'ChatGPT', 'YouTube'
 
 export default function AccountsMarketplace() {
   const [sp, setSp] = useSearchParams();
+  const navigate = useNavigate();
   const initialCat = sp.get('category') || 'all';
   const initialQ = sp.get('q') || '';
 
@@ -161,28 +162,28 @@ export default function AccountsMarketplace() {
               <Grid3x3 size={13} /> All categories
             </button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-3">
             {ACCOUNT_CATEGORIES.map((c) => {
               const Icon = Icons[c.icon] || Icons.Box;
               const active = activeCat === c.id;
               return (
                 <button
                   key={c.id}
-                  onClick={() => pickCategory(c.id)}
-                  className={`group flex items-start gap-3 rounded-2xl border p-3.5 text-left btn-hover ${
+                  onClick={() => (c.id === 'social-media' ? navigate('/accounts/social-media') : pickCategory(c.id))}
+                  aria-pressed={active}
+                  aria-label={`Browse ${c.name}`}
+                  title={c.name}
+                  className={`group flex flex-col items-center gap-1.5 rounded-2xl border p-2.5 sm:p-3 text-center btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70 ${
                     active
                       ? 'border-emerald-500/50 bg-emerald-500/10'
                       : 'border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-emerald-500/30'
                   }`}
                 >
                   <div className={`h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center shadow-lg`}>
-                    <Icon className="h-5 w-5 text-white" strokeWidth={1.8} />
+                    <Icon className="h-5 w-5 text-white" strokeWidth={1.8} aria-hidden="true" />
                   </div>
-                  <div className="min-w-0">
-                    <span className="block text-xs font-semibold text-slate-100 leading-tight truncate group-hover:text-white">{c.name}</span>
-                    <span className="text-[11px] text-slate-500">{countFor(c.id)} listings</span>
-                    <span className="hidden lg:block text-[11px] text-slate-500 leading-snug clamp-2 mt-1">{c.blurb}</span>
-                  </div>
+                  <span className="block w-full text-[11px] font-semibold text-slate-100 leading-tight clamp-2 group-hover:text-white">{c.name}</span>
+                  <span className="text-[10px] text-slate-500">{countFor(c.id)}</span>
                 </button>
               );
             })}
