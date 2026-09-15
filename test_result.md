@@ -141,10 +141,19 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
+        comment: "PREMIUM/TRUST enhancement (additive, Accounts files only: accountsData.js, AccountsMarketplace.jsx, AccountDetail.jsx). Added: (1) social-proof stats bar under landing hero; (2) landing cards show verified-seller badge, 'X sold', and low-stock 'Only N left'; (3) detail page adds social-proof row (sold/viewing/last sold), seller trust card (verified, seller rating, sales, response time, member since, KYC), 'How escrow protects you' 3-step, buyer-guarantees grid (replacement warranty, money-back, KYC sellers, secure handover), and FAQ accordion; (4) purchase card shows verified-seller + sold chips and escrow/secure/warranty assurance rows. Derived deterministically from existing listing data; no backend/checkout/orders/DB changes. Needs UI retest."
+      - working: true
+        agent: "testing"
+        comment: "PASS — 24 tests on desktop + mobile. Landing: social-proof stats bar (4 stats), 13 verified-seller badges, 12 'X sold' indicators, 4 low-stock badges; search/filter/sort/load-more intact. Detail: social-proof row, seller trust card (verified/rating/sales/responds/member-since/KYC), 'How escrow protects you' 3-step, 4 buyer-guarantees, FAQ accordion opens on click, purchase-card chips + assurance rows, related navigation works. No regressions, no console errors."
+      - working: "NA"
+        agent: "main"
         comment: "New additive buyer-side Accounts Marketplace at /accounts (+ /accounts/:id detail). Self-contained accountsData.js with 13 categories (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce, Gaming, Creator, AI & Software, Website & Digital Assets, Community, Dating & Lifestyle, Others/Custom) and 52 listings. Landing: hero+search, popular chips, 13-category nav grid with per-category counts + All categories, result count, sort (popular/newest/price/rating), category+search filter with Clear, responsive grid, Load more (12/step). Detail: breadcrumb, gradient hero, escrow/category chips, rating/delivery/stock, description, 'What you get' grid, trust boxes, sticky purchase card with placeholder 'Buy now' (toast — checkout intentionally NOT wired) + Contact seller + related listings. Reuses Header/Footer/Button. App.js +2 routes; general Marketplace 'Accounts' card links to /accounts. No backend/product/checkout/payment changes. Screenshots verified landing (52 results, 13 categories) + detail."
       - working: true
         agent: "testing"
         comment: "PASS — Comprehensive testing completed on desktop (1440x900) and mobile (390x844) viewports. All 6 test items verified: (1) Landing page (/accounts) loads with hero heading 'Buy verified accounts with escrow', search input, 'Browse account categories' section showing all 13 category cards (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce, Gaming, Creator, AI & Software, Website & Digital Assets, Community, Dating & Lifestyle, Others/Custom), results count '52 results', sort dropdown, and 12 listing cards. (2) Search: typed 'Stripe', URL updated to q=Stripe, results filtered to 1 Stripe listing, clear (X) button cleared search, results returned to 52. (3) Category filtering: clicked 'Gaming Accounts', heading changed to 'Gaming Accounts', results count '4 results', URL updated to category=gaming, only gaming listings shown, 'Clear filter' reset to 52 results. (4) Sorting: 'Price: Low to High' shows lowest prices first ($0 Quote), 'Price: High to Low' shows highest first ($499), 'Top Rated' shows 4.9 rating first. (5) Load more: initial 12 cards, 'Load more accounts' button present, first click loaded 24 cards, second click loaded 36 cards. (6) Detail navigation: clicked listing card, navigated to /accounts/:id, breadcrumb present (Accounts Marketplace / Category / Title), gradient hero, 'Escrow protected' chip, rating/delivery/stock row, 'What you get' section with 4 features, sticky purchase card with price and 'Buy now' button, 'Contact seller' link, 'More in Category' related listings section, clicked related listing navigated to another detail page, breadcrumb category link navigated back to /accounts?category=ai-software. Mobile viewport: all elements render correctly. No console errors. Minor: Cloudflare RUM network requests fail (non-critical CDN analytics). All functionality working as specified."
+      - working: true
+        agent: "testing"
+        comment: "PASS — Premium/trust UI enhancements verified. Comprehensive testing (24 tests) on desktop (1440x900) and mobile (390x844). LANDING (/accounts): ✅ Hero 'Buy verified accounts with escrow' + search input. ✅ NEW social-proof stats bar with 4 stats (12,400+ Accounts delivered, 4.9/5 Average buyer rating, 100% Escrow protected, 1-2 days Typical handover). ✅ All 13 category cards present. ✅ Result count '52 results'. ✅ NEW listing cards show verified-seller badge (13 found), 'X sold' (12 found), and low-stock 'Only N left' badges (4 found). ✅ Search (Binance->1 result, Clear->52), category filter (Gaming->4 results, Clear->52), sort (Low/High/Top Rated), and load more (12->24 cards) all work. DETAIL (/accounts/:id): ✅ Breadcrumb, gradient hero, escrow chip, rating/delivery/stock row. ✅ NEW social-proof row (X sold, N viewing now, Last sold Xh ago). ✅ NEW seller trust card (seller name, verified badge, seller rating, sales count, Responds ~Xh, Member since, KYC Verified). ✅ Existing 'What you get' (4 features). ✅ NEW 'How escrow protects you' (3 steps). ✅ NEW buyer-guarantees grid (4 guarantees: Replacement warranty, Money-back protection, Identity-checked sellers, Private secure handover). ✅ NEW FAQ accordion (4 items, opens on click). ✅ Purchase card with price, NEW verified-seller + 'X sold' chips, delivery/availability/protection rows, 'Buy now' button, 'Contact seller' link, and NEW assurance rows (escrow/secure handover/warranty). ✅ 'More in Category' related section (3 cards, navigation works). MOBILE: ✅ All elements render correctly. CONSOLE: ✅ No errors. Minor: 2 Cloudflare RUM requests failed (non-critical CDN analytics). NOTHING regressed. All NEW premium/trust elements present and working. Core functionality (search, filter, sort, load more, navigation) intact."
 
   - task: "Account Management — role-aware account menu & admin card gating (buyer/seller/admin)"
     implemented: true
@@ -273,8 +282,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Accounts Marketplace — buyer-side browsing (landing, 13 categories, search, filter, sort, load-more, detail)"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -559,3 +567,68 @@ agent_communication:
       
       **Conclusion:**
       All 6 test items passed successfully on both desktop and mobile viewports. The Accounts Marketplace is fully functional with no critical issues. Client-side data (52 listings across 13 categories) working as expected. "Buy now" button shows toast message (checkout intentionally not wired per requirements).
+
+  - agent: "main"
+    message: |
+      Verify the ShahLance Accounts Marketplace section still works after additive premium/trust UI enhancements. Test ONLY the Accounts section (public, no login). Do NOT modify code. Base URL from /app/frontend/.env. Routes: /accounts and /accounts/:id.
+
+      Focus on confirming NOTHING regressed and the NEW trust/premium elements render:
+
+      LANDING (/accounts):
+      - Page loads; hero "Buy verified accounts with escrow", search input present.
+      - NEW: a social-proof stats bar with 4 stats (Accounts delivered, Average buyer rating, Escrow protected, Typical handover) appears under the hero.
+      - All 13 category cards present; result count "52 results".
+      - NEW on listing cards: a verified-seller check badge next to the seller name, an "X sold" figure in the meta row, and some cards show an "Only N left" low-stock badge.
+      - Core still works: search (e.g. "Binance") filters and Clear resets to 52; clicking a category (e.g. "Gaming Accounts") filters to that category and Clear resets; sort dropdown (Price: Low to High / High to Low) reorders; "Load more accounts" loads additional cards (12 -> 24).
+
+      DETAIL (/accounts/:id — click any listing card):
+      - Loads with breadcrumb, gradient hero, title, rating/delivery/stock.
+      - NEW: social-proof row (X sold · N viewing now · Last sold Xh ago).
+      - NEW: a seller trust card showing seller name with a verified badge, seller rating, sales count, and stats (Responds ~Xh, Member since, KYC Verified).
+      - Existing "What you get" list still present.
+      - NEW: "How escrow protects you" section with 3 steps; a buyer-guarantees grid (Replacement warranty, Money-back protection, Identity-checked sellers, Private secure handover); and a "Frequently asked" FAQ accordion where clicking a question expands the answer.
+      - Purchase card (right, sticky): price, NEW verified-seller + "X sold" chips, delivery/availability/protection rows, "Buy now" button (clicking shows a toast, no navigation/checkout), "Contact seller" link, and NEW assurance rows (escrow / secure handover / replacement warranty).
+      - Related "More in <Category>" section still navigates to another detail.
+
+      Test desktop (1440x900) and mobile (390x844). Report ONLY issues if found; otherwise confirm pass.
+
+  - agent: "testing"
+    message: |
+      ✅ ACCOUNTS MARKETPLACE PREMIUM/TRUST UI ENHANCEMENTS — ALL TESTS PASSED
+      
+      Comprehensive testing (24 tests) completed on desktop (1440x900) and mobile (390x844). Base URL: https://shahcode-review.preview.emergentagent.com
+      
+      **LANDING PAGE (/accounts) — ALL PASS:**
+      ✅ Hero "Buy verified accounts with escrow" + search input present
+      ✅ NEW: Social-proof stats bar with 4 stats (12,400+ Accounts delivered, 4.9/5 Average buyer rating, 100% Escrow protected, 1-2 days Typical handover)
+      ✅ All 13 category cards present (Social Media, Email, Advertising, Payment & Finance, Crypto & Web3, E-commerce, Gaming, Creator, AI & Software, Website & Digital Assets, Community, Dating & Lifestyle, Others/Custom)
+      ✅ Result count "52 results"
+      ✅ NEW: Listing cards show verified-seller badge (13 found), "X sold" (12 found), and low-stock "Only N left" badges (4 found)
+      ✅ Search works (Binance → 1 result, Clear → 52)
+      ✅ Category filtering works (Gaming → 4 results, Clear → 52)
+      ✅ Sort dropdown works (Price: Low to High shows "Quote", High to Low shows "$499.00", Top Rated shows "4.9")
+      ✅ Load more works (12 → 24 cards)
+      
+      **DETAIL PAGE (/accounts/:id) — ALL PASS:**
+      ✅ Breadcrumb present (Accounts Marketplace / Category / Title)
+      ✅ Gradient hero with icon, "Escrow protected" chip
+      ✅ Rating/delivery/stock row
+      ✅ NEW: Social-proof row (X sold, N viewing now, Last sold Xh ago) — all present
+      ✅ NEW: Seller trust card with seller name, verified badge, seller rating, sales count, and stats (Responds ~Xh, Member since, KYC Verified) — all present
+      ✅ Existing "What you get" section with 4 features
+      ✅ NEW: "How escrow protects you" section with 3 steps
+      ✅ NEW: Buyer-guarantees grid with 4 guarantees (Replacement warranty, Money-back protection, Identity-checked sellers, Private secure handover)
+      ✅ NEW: FAQ accordion with 4 items (opens on click)
+      ✅ Purchase card: price, NEW verified-seller + "X sold" chips, delivery/availability/protection rows, "Buy now" button (shows toast), "Contact seller" link, NEW assurance rows (escrow/secure handover/warranty)
+      ✅ "More in Category" related section with 3 cards, navigation works
+      
+      **MOBILE (390x844) — ALL PASS:**
+      ✅ Landing page renders correctly (hero, stats bar with 4 items, 13 categories, 12 listing cards)
+      ✅ Detail page renders correctly (breadcrumb, hero icon, social-proof row, seller trust card, escrow section, buyer-guarantees, FAQ, purchase card)
+      
+      **CONSOLE & NETWORK:**
+      ✅ No console errors
+      ⚠️ Minor: 2 Cloudflare RUM (cdn-cgi/rum) network requests failed — non-critical CDN analytics, does not affect functionality
+      
+      **CONCLUSION:**
+      NOTHING regressed. All NEW premium/trust elements present and working perfectly. Core functionality (search, filter, sort, load more, navigation) intact. All 24 tests passed.

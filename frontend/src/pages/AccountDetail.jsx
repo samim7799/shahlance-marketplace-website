@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import {
   ArrowLeft, ChevronRight, Star, Clock, ShieldCheck, CheckCircle2, Package,
-  BadgeCheck, Zap, Store, MessageCircle, Lock,
+  BadgeCheck, Zap, Store, MessageCircle, Lock, Users, ShoppingCart, HelpCircle,
+  Timer, CalendarDays, TrendingUp,
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -11,6 +12,7 @@ import { Button } from '../components/ui/button';
 import { useToast } from '../hooks/use-toast';
 import {
   getAccountListing, getAccountCategory, getListingFeatures, ACCOUNT_LISTINGS,
+  getSellerMeta, getListingStats, ACCOUNTS_ESCROW_STEPS, ACCOUNTS_GUARANTEES, ACCOUNTS_FAQ,
 } from '../mock/accountsData';
 
 export default function AccountDetail() {
@@ -43,6 +45,8 @@ export default function AccountDetail() {
 
   const Icon = Icons[listing.icon] || Icons.Package;
   const features = getListingFeatures(listing);
+  const seller = getSellerMeta(listing);
+  const stats = getListingStats(listing);
 
   const buyNow = () => {
     toast({
@@ -97,7 +101,43 @@ export default function AccountDetail() {
               <span className="inline-flex items-center gap-1.5"><Package size={15} className="text-slate-400" /> {listing.stock} in stock</span>
             </div>
 
+            {/* Social proof */}
+            <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 py-1 text-slate-300"><ShoppingCart size={12} className="text-emerald-400" /> {stats.sold} sold</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 py-1 text-slate-300"><Users size={12} className="text-sky-400" /> {stats.viewing} viewing now</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2.5 py-1 text-slate-300"><TrendingUp size={12} className="text-fuchsia-400" /> Last sold {stats.lastSoldHrs}h ago</span>
+              {stats.lowStock && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-amber-300 font-medium">Only {listing.stock} left</span>
+              )}
+            </div>
+
             <p className="mt-5 text-sm sm:text-base text-slate-300 leading-relaxed">{listing.description}</p>
+
+            {/* Seller trust card */}
+            <div className="mt-6 card-surface rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="h-12 w-12 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center text-lg font-bold text-slate-900">
+                  {seller.name.charAt(0)}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-white truncate">{seller.name}</span>
+                    <BadgeCheck size={15} className="text-emerald-400 shrink-0" />
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-slate-400">
+                    <span className="inline-flex items-center gap-1"><Star size={11} className="text-amber-400 fill-amber-400" /> {seller.rating.toFixed(1)} seller rating</span>
+                    <span>·</span>
+                    <span>{seller.sales.toLocaleString()} sales</span>
+                  </div>
+                </div>
+              </div>
+              <div className="sm:ml-auto grid grid-cols-3 gap-4 text-center">
+                <SellerStat Icon={Timer} value={`~${seller.responseHours}h`} label="Responds" />
+                <SellerStat Icon={CalendarDays} value={seller.memberSince} label="Member since" />
+                <SellerStat Icon={ShieldCheck} value="KYC" label="Verified" />
+              </div>
+            </div>
+
 
             {/* What you get */}
             <div className="mt-8 card-surface rounded-2xl p-5 sm:p-6">
@@ -118,6 +158,56 @@ export default function AccountDetail() {
               <TrustBox Icon={Lock} title="Secure handover" desc="Credentials shared safely" />
               <TrustBox Icon={Zap} title="Support included" desc="Post-sale assistance" />
             </div>
+
+            {/* How escrow protects you */}
+            <div className="mt-8 card-surface rounded-2xl p-5 sm:p-6">
+              <h2 className="text-base font-bold text-white flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-400" /> How escrow protects you</h2>
+              <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                {ACCOUNTS_ESCROW_STEPS.map((s, i) => {
+                  const SIcon = Icons[s.icon] || Icons.Circle;
+                  return (
+                    <div key={i} className="relative rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                      <span className="absolute top-3 right-3 text-[11px] font-bold text-slate-600">0{i + 1}</span>
+                      <div className="h-9 w-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center"><SIcon size={17} className="text-emerald-400" /></div>
+                      <h4 className="mt-3 text-sm font-semibold text-white">{s.title}</h4>
+                      <p className="mt-1 text-xs text-slate-400 leading-relaxed">{s.desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Buyer guarantees */}
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {ACCOUNTS_GUARANTEES.map((g, i) => {
+                const GIcon = Icons[g.icon] || Icons.Shield;
+                return (
+                  <div key={i} className="card-surface rounded-2xl p-5 flex items-start gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0"><GIcon size={18} className="text-emerald-400" /></div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">{g.title}</h4>
+                      <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{g.desc}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* FAQ */}
+            <div className="mt-8">
+              <h2 className="text-base font-bold text-white flex items-center gap-2"><HelpCircle size={16} className="text-emerald-400" /> Frequently asked</h2>
+              <div className="mt-4 space-y-2.5">
+                {ACCOUNTS_FAQ.map((f, i) => (
+                  <details key={i} className="group card-surface rounded-xl px-4 py-3">
+                    <summary className="flex items-center justify-between cursor-pointer list-none text-sm font-medium text-slate-100">
+                      <span>{f.q}</span>
+                      <ChevronRight size={16} className="text-slate-400 transition-transform group-open:rotate-90 shrink-0 ml-3" />
+                    </summary>
+                    <p className="mt-2.5 text-sm text-slate-400 leading-relaxed">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* RIGHT — purchase card */}
@@ -126,6 +216,12 @@ export default function AccountDetail() {
               <div className="flex items-baseline justify-between">
                 <span className="text-xs uppercase tracking-wider text-slate-500">{listing.priceLabel}</span>
                 <span className="text-3xl font-extrabold text-white">{listing.price === 0 ? 'Custom' : `$${listing.price.toFixed(2)}`}</span>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 text-emerald-300 font-medium"><BadgeCheck size={11} /> Verified seller</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-slate-300"><ShoppingCart size={11} /> {stats.sold} sold</span>
+                {stats.lowStock && <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-amber-300 font-medium">Only {listing.stock} left</span>}
               </div>
 
               <div className="mt-4 space-y-2.5 text-sm">
@@ -140,9 +236,11 @@ export default function AccountDetail() {
               <Link to="/contact" className="mt-2.5 w-full inline-flex items-center justify-center gap-2 rounded-xl h-11 border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 text-sm font-semibold btn-hover">
                 <MessageCircle size={15} /> Contact seller
               </Link>
-              <p className="mt-3 text-[11px] text-slate-500 text-center leading-relaxed">
-                Your payment is held in escrow and only released once you confirm the account works.
-              </p>
+              <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
+                <AssureRow Icon={ShieldCheck} text="Escrow protected — released only when you confirm" />
+                <AssureRow Icon={Lock} text="Private, secure credential handover" />
+                <AssureRow Icon={Zap} text="Replacement warranty included" />
+              </div>
             </div>
           </aside>
         </div>
@@ -189,6 +287,25 @@ function Row({ Icon, label, value }) {
     <div className="flex items-center justify-between">
       <span className="inline-flex items-center gap-2 text-slate-400"><Icon size={15} /> {label}</span>
       <span className="text-slate-200 font-medium">{value}</span>
+    </div>
+  );
+}
+
+function AssureRow({ Icon, text }) {
+  return (
+    <div className="flex items-start gap-2 text-[11px] text-slate-400 leading-relaxed">
+      <Icon size={13} className="text-emerald-400 mt-0.5 shrink-0" />
+      <span>{text}</span>
+    </div>
+  );
+}
+
+function SellerStat({ Icon, value, label }) {
+  return (
+    <div className="min-w-[64px]">
+      <Icon size={14} className="mx-auto text-slate-400" />
+      <div className="mt-1 text-sm font-bold text-white leading-none">{value}</div>
+      <div className="text-[10px] text-slate-500 mt-0.5">{label}</div>
     </div>
   );
 }

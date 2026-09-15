@@ -155,3 +155,59 @@ export function getAccountCategory(id) {
 export function getListingFeatures(listing) {
   return CATEGORY_GETS[listing.category] || CATEGORY_GETS.others;
 }
+
+// --- Premium / trust helpers (additive, deterministic from listing data) ---
+function seedOf(listing) {
+  return (listing.reviews || 0) + (listing.title ? listing.title.length : 0) + (listing.stock || 0);
+}
+
+export function getSellerMeta(listing) {
+  const s = seedOf(listing);
+  return {
+    name: listing.seller,
+    verified: true,
+    rating: Math.min(5, 4.6 + ((s % 4) * 0.1)),
+    sales: 320 + ((s * 37) % 5200),
+    responseHours: 1 + (s % 6),
+    memberSince: 2018 + (s % 6),
+    topRated: (s % 3 === 0),
+  };
+}
+
+export function getListingStats(listing) {
+  const s = seedOf(listing);
+  return {
+    sold: 40 + ((s * 13) % 940),
+    viewing: 3 + (s % 18),
+    lastSoldHrs: 1 + (s % 22),
+    lowStock: (listing.stock || 0) > 0 && (listing.stock || 0) <= 6,
+  };
+}
+
+export const ACCOUNTS_ESCROW_STEPS = [
+  { icon: 'Wallet', title: 'You pay into escrow', desc: 'Your money is held securely by ShahLance — the seller cannot access it yet.' },
+  { icon: 'Send', title: 'Seller delivers the account', desc: 'You receive the login and full ownership details, privately and securely.' },
+  { icon: 'ShieldCheck', title: 'You confirm, funds release', desc: 'Only once you verify the account works is payment released to the seller.' },
+];
+
+export const ACCOUNTS_GUARANTEES = [
+  { icon: 'RefreshCw', title: 'Replacement warranty', desc: 'Free replacement if the account stops working within the warranty window.' },
+  { icon: 'Undo2', title: 'Money-back protection', desc: 'Full refund if the account is never delivered or is not as described.' },
+  { icon: 'BadgeCheck', title: 'Identity-checked sellers', desc: 'Every account seller is KYC-verified before they can list.' },
+  { icon: 'Lock', title: 'Private, secure handover', desc: 'Credentials are shared through a protected channel — never public.' },
+];
+
+export const ACCOUNTS_FAQ = [
+  { q: 'How do I receive the account after buying?', a: 'After escrow payment, the seller privately shares the login and recovery details. Most accounts are handed over within the stated delivery time.' },
+  { q: 'What if the account does not work?', a: 'Funds stay in escrow until you confirm it works. If there is a problem, you can request a replacement or a refund before releasing payment.' },
+  { q: 'Can I change the email and password?', a: 'Yes. For most listings you receive full ownership and can update the email, password and 2FA after handover.' },
+  { q: 'Is buying accounts safe here?', a: 'Every seller is identity-verified, payments are escrow-protected, and handovers happen through a secure channel with post-sale support.' },
+];
+
+export const ACCOUNTS_MARKETPLACE_STATS = [
+  { icon: 'Layers', value: '12,400+', label: 'Accounts delivered' },
+  { icon: 'Star', value: '4.9/5', label: 'Average buyer rating' },
+  { icon: 'ShieldCheck', value: '100%', label: 'Escrow protected' },
+  { icon: 'Zap', value: '1–2 days', label: 'Typical handover' },
+];
+

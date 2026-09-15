@@ -8,7 +8,7 @@ import {
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/button';
-import { ACCOUNT_CATEGORIES, ACCOUNT_LISTINGS } from '../mock/accountsData';
+import { ACCOUNT_CATEGORIES, ACCOUNT_LISTINGS, ACCOUNTS_MARKETPLACE_STATS, getListingStats } from '../mock/accountsData';
 
 const SORTS = [
   { id: 'popular', label: 'Most Popular' },
@@ -121,6 +121,24 @@ export default function AccountsMarketplace() {
               </button>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF STATS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2">
+        <div className="rounded-2xl border border-white/5 bg-white/[0.02] grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/5">
+          {ACCOUNTS_MARKETPLACE_STATS.map((s, i) => {
+            const SIcon = Icons[s.icon] || Icons.Star;
+            return (
+              <div key={i} className={`flex items-center gap-3 px-4 py-4 ${i >= 2 ? 'border-t sm:border-t-0 border-white/5' : ''}`}>
+                <div className="h-9 w-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0"><SIcon size={17} className="text-emerald-400" /></div>
+                <div className="min-w-0">
+                  <div className="text-base font-extrabold text-white leading-none">{s.value}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">{s.label}</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -241,6 +259,7 @@ export default function AccountsMarketplace() {
 
 function AccountCard({ listing }) {
   const Icon = Icons[listing.icon] || Icons.Package;
+  const stats = getListingStats(listing);
   return (
     <Link
       to={`/accounts/${listing.id}`}
@@ -257,13 +276,19 @@ function AccountCard({ listing }) {
         <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/40 backdrop-blur px-2 py-1 text-[11px] font-medium text-emerald-300 border border-emerald-400/30">
           <ShieldCheck size={10} /> Escrow
         </span>
+        {stats.lowStock && (
+          <span className="absolute bottom-3 left-3 rounded-full bg-amber-500/90 px-2.5 py-1 text-[11px] font-bold text-slate-900">
+            Only {listing.stock} left
+          </span>
+        )}
       </div>
       <div className="p-4 flex flex-col gap-3 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center text-[10px] font-bold text-slate-900">
+        <div className="flex items-center gap-1.5">
+          <span className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center text-[10px] font-bold text-slate-900 shrink-0">
             {listing.seller.charAt(0)}
           </span>
           <span className="text-xs text-slate-300 font-medium truncate">{listing.seller}</span>
+          <BadgeCheck size={13} className="text-emerald-400 shrink-0" />
         </div>
         <h3 className="text-sm sm:text-[15px] font-semibold text-white leading-snug clamp-2 group-hover:text-emerald-300 btn-hover">
           {listing.title}
@@ -277,6 +302,7 @@ function AccountCard({ listing }) {
           <span className="inline-flex items-center gap-1">
             <Clock size={13} /> {listing.deliveryDays}d
           </span>
+          <span className="inline-flex items-center gap-1 text-slate-500">· {stats.sold} sold</span>
         </div>
         <div className="mt-auto pt-3 border-t border-white/5 flex items-baseline justify-between">
           <span className="text-[11px] uppercase tracking-wider text-slate-500">{listing.priceLabel}</span>
