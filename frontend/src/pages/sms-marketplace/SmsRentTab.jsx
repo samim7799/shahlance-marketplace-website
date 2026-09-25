@@ -78,7 +78,7 @@ export default function SmsRentTab({ onRentCreated }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <h4 className="font-bold text-sm text-white">{card.title}</h4>
-                    <span className={`px-2 py-0.2 rounded-full text-[10px] font-bold border ${card.badgeColor}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${card.badgeColor}`}>
                       {card.badge}
                     </span>
                   </div>

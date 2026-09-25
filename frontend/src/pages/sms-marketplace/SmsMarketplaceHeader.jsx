@@ -21,7 +21,7 @@ export default function SmsMarketplaceHeader({ activeTab, setActiveTab, notifica
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-sm tracking-tight text-white">ShahSMS</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                   FAST
                 </span>
               </div>

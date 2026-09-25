@@ -45,7 +45,7 @@ export default function SmsOrdersTab({ orders = [] }) {
               }`}
             >
               <span>{tab.label}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-black/20 text-slate-950 font-black' : 'bg-white/5 text-slate-400'}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${isActive ? 'bg-black/20 text-slate-950 font-black' : 'bg-white/5 text-slate-400'}`}>
                 {count}
               </span>
             </button>

@@ -6,7 +6,6 @@ import { MOCK_SERVICES, MOCK_COUNTRIES, NUMBER_TYPES } from './smsMarketplaceDat
 export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const serviceQueryParam = searchParams.get('service');
-  const numberTypeParam = searchParams.get('numberType');
 
   const [searchService, setSearchService] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ALL');
@@ -27,6 +26,18 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
       }
     }
   }, [serviceQueryParam]);
+
+  // Handle ESC key to dismiss modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (showCountryModal) setShowCountryModal(false);
+        if (activeServiceForOrder) handleCloseNumberTypeModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showCountryModal, activeServiceForOrder]);
 
   // Filtered countries for the country picker modal
   const filteredCountries = useMemo(() => {
@@ -50,12 +61,12 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
   const handleOpenNumberTypeSelection = (service) => {
     setActiveServiceForOrder(service);
     setSelectedNumberType(NUMBER_TYPES[0]);
-    setSearchParams({ tab: 'services', service: service.code });
+    setSearchParams({ tab: 'services', service: service.code }, { replace: true });
   };
 
   const handleCloseNumberTypeModal = () => {
     setActiveServiceForOrder(null);
-    setSearchParams({ tab: 'services' });
+    setSearchParams({ tab: 'services' }, { replace: true });
   };
 
   // Confirm order (UI mock only)
@@ -107,7 +118,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
             <button
               type="button"
               onClick={() => setSearchService('')}
-              className="absolute right-3 top-2.5 text-slate-400 hover:text-white"
+              className="absolute right-3 top-2.5 text-slate-400 hover:text-white cursor-pointer"
             >
               <X size={15} />
             </button>
@@ -120,7 +131,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
             type="button"
             data-testid="search-country-bar"
             onClick={() => setShowCountryModal(true)}
-            className="flex-1 flex items-center justify-between bg-[#0d1426] border border-white/10 hover:border-white/20 rounded-2xl px-3.5 py-2 text-xs text-slate-200 transition-all"
+            className="flex-1 flex items-center justify-between bg-[#0d1426] border border-white/10 hover:border-white/20 rounded-2xl px-3.5 py-2 text-xs text-slate-200 transition-all cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <span className="text-base">{currentCountryObj.flag}</span>
@@ -139,7 +150,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
               type="button"
               data-testid="reset-country-filter-btn"
               onClick={() => setSelectedCountry('ALL')}
-              className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-300 hover:text-white"
+              className="px-2.5 py-2 rounded-xl bg-white/5 border border-white/10 text-[11px] text-slate-300 hover:text-white cursor-pointer"
               title="Reset country filter"
             >
               All
@@ -168,7 +179,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
             <button
               type="button"
               onClick={() => { setSearchService(''); setSelectedCountry('ALL'); }}
-              className="text-xs text-emerald-400 font-semibold"
+              className="text-xs text-emerald-400 font-semibold cursor-pointer"
             >
               Reset all filters
             </button>
@@ -224,7 +235,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
                   type="button"
                   data-testid={`select-service-btn-${service.code}`}
                   onClick={() => handleOpenNumberTypeSelection(service)}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow shadow-emerald-500/20 active:scale-95"
+                  className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow shadow-emerald-500/20 active:scale-95 cursor-pointer"
                 >
                   Select
                 </button>
@@ -272,7 +283,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
                 type="button"
                 data-testid="close-number-type-modal-btn"
                 onClick={handleCloseNumberTypeModal}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -298,7 +309,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-xs text-white">{type.title}</span>
-                        <span className={`px-2 py-0.2 rounded-full text-[10px] font-bold border ${type.badgeColor}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${type.badgeColor}`}>
                           {type.badge}
                         </span>
                       </div>
@@ -338,7 +349,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
                 data-testid="confirm-buy-number-btn"
                 disabled={orderConfirming}
                 onClick={handleConfirmOrder}
-                className="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wide transition-all shadow-lg shadow-emerald-500/25 active:scale-95 disabled:opacity-50"
+                className="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wide transition-all shadow-lg shadow-emerald-500/25 active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 {orderConfirming ? 'Provisioning Carrier Line...' : `Confirm & Get ${selectedNumberType.title}`}
               </button>
@@ -363,7 +374,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
               <button
                 type="button"
                 onClick={() => setShowCountryModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -391,7 +402,7 @@ export default function SmsServicesTab({ onSelectService, onOrderCreated }) {
                     setSelectedCountry(c.code);
                     setShowCountryModal(false);
                   }}
-                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center justify-between transition-colors ${
+                  className={`w-full text-left p-2.5 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
                     selectedCountry === c.code
                       ? 'bg-emerald-500/20 text-emerald-400 font-bold'
                       : 'text-slate-300 hover:bg-white/5'
