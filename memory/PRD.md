@@ -87,6 +87,20 @@ Continue development of an existing GitHub project (samim7788/shahlance-web-dev)
   * Endpoints: `GET /api/admin/commission/settings`, `PUT /api/admin/commission/settings`, `POST /api/admin/commission/calculate`, `GET /api/admin/commission/overview`.
 - Verified: backend test suite (4/4 PASS in `test_commission_system.py`), non-admin 403 gating, and 100% frontend targeted flows verified via Playwright.
 
+## Implemented (Sep 2026 — Digital Product Management Module)
+- Added dedicated Digital Product Management module (`digital_products.py` and `DigitalProductManagementPanel.jsx` in `AdminPanel.jsx` under "Digital Products" tab):
+  * **1. Subscription Management**:
+    - Categories: Add, Edit, and Delete categories (`/api/admin/digital/subscription-categories`).
+    - Products: Add digital product, Edit, Delete, Product image URL, Description, and Category (`/api/admin/digital/subscription-products`).
+    - Plans: Plan name, Duration, Price ($), and Status ON/OFF toggle per plan.
+    - Orders: Subscription orders list displaying User (name & email), Product, Plan, Price, and Order status.
+  * **2. Gift Card Management**:
+    - Brands: Add, Edit, and Delete gift card brands (`/api/admin/digital/gift-card-brands`).
+    - Gift Cards: Brand, Image URL, Description, Stock quantity, Pricing ($), and Status ON/OFF toggle (`/api/admin/digital/gift-cards`).
+    - Orders: Gift card orders list displaying User, Brand, Amount ($), Order status, and Delivery status.
+  * Auto-seed initial data verification on startup for seamless admin evaluation.
+- Verified: 100% backend pass rate (3/3 in `test_digital_products.py` + non-admin 403 authorization gating) and 100% frontend verification via Playwright automation.
+
 ## Backlog / next
 - P1: Wire live Cryptomus/NOWPayments payment creation + webhooks using the stored gateway configs (needs real merchant API keys from user); connect Accounts payment UI to a real gateway.
 - P1: Bring seller-uploaded (approved) products into the public marketplace listing (replace/augment mock catalog with GET /api/seller/products?status=approved) so the whole catalog is DB-backed and searchable.
