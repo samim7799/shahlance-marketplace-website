@@ -298,9 +298,14 @@ export default function AdminPanel() {
             const Icon = t.Icon;
             const active = tab === t.id;
             return (
-              <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold border btn-hover ${
-                active ? 'bg-emerald-500 text-slate-900 border-emerald-500' : 'bg-white/5 border-white/10 text-slate-300 hover:text-white'
-              }`}>
+              <button
+                key={t.id}
+                data-testid={`admin-tab-${t.id}`}
+                onClick={() => setTab(t.id)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold border btn-hover ${
+                  active ? 'bg-emerald-500 text-slate-900 border-emerald-500' : 'bg-white/5 border-white/10 text-slate-300 hover:text-white'
+                }`}
+              >
                 <Icon size={13} /> {t.label}
               </button>
             );

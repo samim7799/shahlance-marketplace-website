@@ -55,6 +55,21 @@ Continue development of an existing GitHub project (samim7788/shahlance-web-dev)
   * Live status endpoint `GET /api/bonus/status`, `POST /api/bonus/evaluate`, `POST /api/bonus/verify-email`, `POST /api/bonus/verify-phone`.
 - Verified: backend test suite (8/8 PASS in `test_bonus_protection.py`), full regression passed (20/20 in `test_wallet_payments.py`), frontend verified end-to-end via automated testing and desktop/mobile verification.
 
+## Implemented (Sep 2026 — Seller & Product Management Module)
+- Added Admin Seller Management module:
+  * Seller Applications list with 1-click Approve and Reject (with reason)
+  * Live Sellers list with real-time Sales Summary (total sales $, completed orders count, live products count)
+  * Seller Profile View modal displaying full application details, contact info, member since, and live products
+  * Suspend/Unsuspend Seller flow with audit reason prompt and confirmation modal, setting `isSuspended: true/false`
+- Added Admin Product Management module:
+  * Product Approvals queue with 1-click Approve and Reject actions
+  * Direct "Add Product" modal with Title, Category (from SELLER_CATEGORIES), Price ($), Stock count, In-Stock toggle switch, Multi-line Description, and Product Image Upload (via `/api/files/upload`) + URL fallback
+  * Product Edit modal supporting in-place updates of title, description, category, price, stock, and image
+  * Product Delete action with confirmation
+  * Product image viewing endpoint `GET /api/files/{id}/view`
+  * Stock management with numeric stock count and In-Stock / Out-of-Stock badge indicators
+- Verified: backend test suite (3/3 PASS in `test_seller_product_mgmt.py`), full non-admin authorization gating (403 Forbidden verified for buyer role), and 100% frontend targeted flows verified via Playwright.
+
 ## Backlog / next
 - P1: Wire live Cryptomus/NOWPayments payment creation + webhooks using the stored gateway configs (needs real merchant API keys from user); connect Accounts payment UI to a real gateway.
 - P1: Bring seller-uploaded (approved) products into the public marketplace listing (replace/augment mock catalog with GET /api/seller/products?status=approved) so the whole catalog is DB-backed and searchable.
