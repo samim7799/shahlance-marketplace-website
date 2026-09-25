@@ -22,7 +22,7 @@ export default function LiveSupportWidget() {
 
   const hidden =
     isAuthenticated ||
-    ['/login', '/signup', '/forgot-password'].includes(location.pathname) ||
+    ['/login', '/signup', '/forgot-password', '/sms-marketplace'].includes(location.pathname) ||
     location.pathname.startsWith('/dashboard');
 
   useEffect(() => { setOpen(false); }, [location.pathname]);

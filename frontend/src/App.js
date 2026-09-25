@@ -27,6 +27,7 @@ import Settings from './pages/Settings';
 import NotificationsPage from './pages/NotificationsPage';
 import ServicesMarketplace from './pages/ServicesMarketplace';
 import ServiceDetails from './pages/ServiceDetails';
+import SmsMarketplaceLayout from './pages/sms-marketplace/SmsMarketplaceLayout';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import BuyerOrders from './pages/BuyerOrders';
@@ -126,6 +127,8 @@ function App() {
             {/* Additive: Buyer Marketplace + Service Ordering System */}
             <Route path="/services" element={<ServicesMarketplace />} />
             <Route path="/services/:id" element={<ServiceDetails />} />
+            {/* Additive: Isolated SMS Verification Marketplace UI Prototype */}
+            <Route path="/sms-marketplace" element={<SmsMarketplaceLayout />} />
             <Route
               path="/orders/checkout/:id"
               element={<ProtectedRoute><Checkout /></ProtectedRoute>}

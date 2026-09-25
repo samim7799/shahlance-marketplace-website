@@ -26,7 +26,7 @@ export default function AuthAccessWidget() {
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
   const hidden =
-    ['/login', '/signup', '/forgot-password'].includes(location.pathname) ||
+    ['/login', '/signup', '/forgot-password', '/sms-marketplace'].includes(location.pathname) ||
     location.pathname.startsWith('/dashboard');
 
   if (hidden || loading) return null;
