@@ -43,4 +43,17 @@ export const adminService = {
     suspiciousUsers: () => api.get('/admin/bonus/suspicious-users').then((r) => r.data),
     review: (body) => api.post('/admin/bonus/review', body).then((r) => r.data),
   },
+
+  sellers: {
+    list: () => api.get('/admin/sellers').then((r) => r.data),
+    summary: (id) => api.get(`/admin/sellers/${id}/summary`).then((r) => r.data),
+    suspend: (id, suspended, reason) => api.post(`/admin/sellers/${id}/suspend`, { suspended, reason: reason || '' }).then((r) => r.data),
+  },
+
+  products: {
+    list: (params) => api.get('/admin/products', { params }).then((r) => r.data),
+    create: (body) => api.post('/admin/products', body).then((r) => r.data),
+    update: (id, body) => api.put(`/admin/products/${id}`, body).then((r) => r.data),
+    delete: (id) => api.delete(`/admin/products/${id}`).then((r) => r.data),
+  },
 };

@@ -90,6 +90,38 @@ export const sellerService = {
     const { data } = await api.post('/files/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
     return data; // { id, filename, size }
   },
+
+  // ---------- Admin Seller Management ----------
+  async adminListSellers() {
+    const { data } = await api.get('/admin/sellers');
+    return data;
+  },
+  async adminGetSellerSummary(sellerId) {
+    const { data } = await api.get(`/admin/sellers/${sellerId}/summary`);
+    return data;
+  },
+  async adminSuspendSeller(sellerId, suspended, reason) {
+    const { data } = await api.post(`/admin/sellers/${sellerId}/suspend`, { suspended, reason: reason || '' });
+    return data;
+  },
+
+  // ---------- Admin Product Management ----------
+  async adminListProducts(params = {}) {
+    const { data } = await api.get('/admin/products', { params });
+    return data;
+  },
+  async adminCreateProduct(body) {
+    const { data } = await api.post('/admin/products', body);
+    return data;
+  },
+  async adminUpdateProduct(id, body) {
+    const { data } = await api.put(`/admin/products/${id}`, body);
+    return data;
+  },
+  async adminDeleteProduct(id) {
+    const { data } = await api.delete(`/admin/products/${id}`);
+    return data;
+  },
 };
 
 export const SELLER_CATEGORIES = [

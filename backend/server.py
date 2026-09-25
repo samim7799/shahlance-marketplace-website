@@ -612,6 +612,8 @@ async def _map_seller_product(sp: dict) -> dict:
         'seller': {'name': seller_name, 'rating': 5.0, 'sales': 0,
                    'avatar': f"https://api.dicebear.com/7.x/avataaars/svg?seed={quote(seller_name)}"},
         'deliveryDays': sp.get('deliveryDays', 3),
+        'stock': int(sp.get('stock', 100)),
+        'inStock': bool(sp.get('inStock', True)),
         'features': DEFAULT_FEATURES,
         'source': 'seller',
     }
@@ -830,6 +832,253 @@ async def decide_withdrawal(wid: str, body: DecideBody, user: dict = Depends(req
     return clean(await db.withdrawals.find_one({'id': wid}))
 
 
+# ===========================================================================
+# SELLER MANAGEMENT (Admin only)
+# ===========================================================================
+@api_router.get("/admin/sellers")
+async def admin_list_sellers(user: dict = Depends(require_admin)):
+    # Fetch all users that are sellers or have applications
+    sellers_map = {}
+    
+    # 1. Gather all seller applications
+    async for app in db.seller_applications.find().sort('createdAt', -1):
+        uid = app.get('userId')
+        if uid and uid not in sellers_map:
+            u = await db.users.find_one({'id': uid})
+            sellers_map[uid] = {
+                'id': uid,
+                'userId': uid,
+                'applicationId': app.get('id'),
+                'fullName': (u or {}).get('fullName') or app.get('fullName', 'Unknown'),
+                'username': (u or {}).get('username') or '',
+                'email': (u or {}).get('email') or app.get('email', ''),
+                'phone': (u or {}).get('phone', ''),
+                'country': (u or {}).get('country') or app.get('country', ''),
+                'sellerType': app.get('sellerType', 'digital-marketplace'),
+                'category': app.get('category', ''),
+                'status': app.get('status', 'pending'),
+                'isSuspended': bool((u or {}).get('isSuspended', False) or app.get('isSuspended', False)),
+                'suspendReason': (u or {}).get('suspendReason') or app.get('suspendReason', ''),
+                'createdAt': app.get('createdAt') or (u or {}).get('createdAt'),
+                'decidedAt': app.get('decidedAt'),
+            }
+
+    # 2. Gather any other users with role seller
+    async for u in db.users.find({'$or': [{'role': 'seller'}, {'isSeller': True}]}):
+        uid = u['id']
+        if uid not in sellers_map:
+            sellers_map[uid] = {
+                'id': uid,
+                'userId': uid,
+                'applicationId': None,
+                'fullName': u.get('fullName', 'Unknown'),
+                'username': u.get('username', ''),
+                'email': u.get('email', ''),
+                'phone': u.get('phone', ''),
+                'country': u.get('country', ''),
+                'sellerType': 'digital-marketplace',
+                'category': '',
+                'status': 'approved',
+                'isSuspended': bool(u.get('isSuspended', False)),
+                'suspendReason': u.get('suspendReason', ''),
+                'createdAt': u.get('createdAt'),
+                'decidedAt': None,
+            }
+
+    # 3. Attach sales summary & product metrics to each seller
+    seller_list = list(sellers_map.values())
+    for s in seller_list:
+        uid = s['userId']
+        # Orders metrics
+        orders = await db.orders.find({'sellerId': uid}).to_list(1000)
+        paid_orders = [o for o in orders if o.get('paymentStatus') == 'paid']
+        total_sales = sum(float(o.get('price', 0)) for o in paid_orders)
+        prods_count = await db.seller_products.count_documents({'userId': uid})
+        s['salesSummary'] = {
+            'totalSales': round(total_sales, 2),
+            'ordersCount': len(orders),
+            'completedOrders': len(paid_orders),
+            'productsCount': prods_count,
+        }
+
+    return seller_list
+
+
+@api_router.get("/admin/sellers/{seller_id}/summary")
+async def admin_seller_summary(seller_id: str, user: dict = Depends(require_admin)):
+    u = await db.users.find_one({'id': seller_id})
+    app = await db.seller_applications.find_one({'userId': seller_id}, sort=[('createdAt', -1)])
+    
+    orders = await db.orders.find({'sellerId': seller_id}).sort('createdAt', -1).to_list(500)
+    paid_orders = [o for o in orders if o.get('paymentStatus') == 'paid']
+    total_sales = sum(float(o.get('price', 0)) for o in paid_orders)
+    
+    prods = await db.seller_products.find({'userId': seller_id}).sort('createdAt', -1).to_list(200)
+
+    return {
+        'seller': {
+            'id': seller_id,
+            'userId': seller_id,
+            'fullName': (u or {}).get('fullName') or (app or {}).get('fullName', 'Unknown'),
+            'username': (u or {}).get('username', ''),
+            'email': (u or {}).get('email') or (app or {}).get('email', ''),
+            'phone': (u or {}).get('phone', ''),
+            'country': (u or {}).get('country') or (app or {}).get('country', ''),
+            'sellerType': (app or {}).get('sellerType', 'digital-marketplace'),
+            'category': (app or {}).get('category', ''),
+            'status': (app or {}).get('status', 'approved' if (u or {}).get('isSeller') else 'pending'),
+            'isSuspended': bool((u or {}).get('isSuspended', False)),
+            'suspendReason': (u or {}).get('suspendReason', ''),
+            'walletBalance': float((u or {}).get('walletBalance') or 0.0),
+            'createdAt': (u or {}).get('createdAt'),
+        },
+        'application': clean(app) if app else None,
+        'salesSummary': {
+            'totalSales': round(total_sales, 2),
+            'ordersCount': len(orders),
+            'completedOrders': len(paid_orders),
+            'productsCount': len(prods),
+            'recentOrders': [clean(o) for o in orders[:5]],
+        },
+        'products': [clean(p) for p in prods],
+    }
+
+
+@api_router.post("/admin/sellers/{seller_id}/suspend")
+async def admin_suspend_seller(seller_id: str, body: dict, user: dict = Depends(require_admin)):
+    suspended = bool(body.get('suspended', True))
+    reason = body.get('reason', '')
+    
+    # Update user record
+    await db.users.update_one(
+        {'id': seller_id},
+        {'$set': {'isSuspended': suspended, 'suspendReason': reason, 'updatedAt': now_iso()}}
+    )
+    # Update seller applications
+    await db.seller_applications.update_many(
+        {'userId': seller_id},
+        {'$set': {'isSuspended': suspended, 'suspendReason': reason, 'updatedAt': now_iso()}}
+    )
+    # When suspended, optionally update active products status
+    if suspended:
+        await db.seller_products.update_many(
+            {'userId': seller_id, 'status': 'approved'},
+            {'$set': {'suspendedBySeller': True, 'updatedAt': now_iso()}}
+        )
+    else:
+        await db.seller_products.update_many(
+            {'userId': seller_id, 'suspendedBySeller': True},
+            {'$unset': {'suspendedBySeller': ''}, '$set': {'updatedAt': now_iso()}}
+        )
+
+    return {'ok': True, 'sellerId': seller_id, 'suspended': suspended, 'reason': reason}
+
+
+# ===========================================================================
+# PRODUCT MANAGEMENT (Admin only)
+# ===========================================================================
+@api_router.get("/admin/products")
+async def admin_list_products(
+    request: Request,
+    status: Optional[str] = None,
+    category: Optional[str] = None,
+    search: Optional[str] = None,
+    user: dict = Depends(require_admin)
+):
+    q = {}
+    if status and status != 'all':
+        q['status'] = status
+    if category and category != 'all':
+        q['category'] = category
+    if search:
+        s = search.strip()
+        q['$or'] = [
+            {'title': {'$regex': s, '$options': 'i'}},
+            {'description': {'$regex': s, '$options': 'i'}},
+            {'category': {'$regex': s, '$options': 'i'}},
+        ]
+
+    docs = await db.seller_products.find(q).sort('createdAt', -1).to_list(1000)
+    result = []
+    for d in docs:
+        item = clean(d)
+        item['stock'] = int(item.get('stock', 100))
+        item['inStock'] = bool(item.get('inStock', True))
+        result.append(item)
+    return result
+
+
+@api_router.post("/admin/products")
+async def admin_create_product(body: dict, user: dict = Depends(require_admin)):
+    title = (body.get('title') or '').strip()
+    if not title:
+        raise HTTPException(status_code=400, detail='Product title is required.')
+
+    price = float(body.get('price', 0))
+    if price < 0:
+        raise HTTPException(status_code=400, detail='Price must be non-negative.')
+
+    stock = int(body.get('stock', 100))
+    in_stock = bool(body.get('inStock', True))
+    
+    prod_id = f"sp_{uuid.uuid4().hex[:12]}"
+    doc = {
+        'id': prod_id,
+        'userId': user['id'],
+        'title': title,
+        'category': body.get('category', 'Software'),
+        'price': price,
+        'description': body.get('description', ''),
+        'image': body.get('image', ''),
+        'stock': stock,
+        'inStock': in_stock,
+        'status': body.get('status', 'approved'),
+        'fileId': body.get('fileId', ''),
+        'fileName': body.get('fileName', ''),
+        'createdAt': now_iso(),
+        'updatedAt': now_iso(),
+    }
+    await db.seller_products.insert_one(doc)
+    return clean(doc)
+
+
+@api_router.put("/admin/products/{product_id}")
+async def admin_update_product(product_id: str, body: dict, user: dict = Depends(require_admin)):
+    existing = await db.seller_products.find_one({'id': product_id})
+    if not existing:
+        # Check if in seed products
+        seed_exist = await db.products.find_one({'id': product_id})
+        if not seed_exist:
+            raise HTTPException(status_code=404, detail='Product not found.')
+
+    upd = {'updatedAt': now_iso()}
+    for key in ['title', 'category', 'description', 'image', 'fileId', 'fileName', 'status']:
+        if key in body:
+            upd[key] = body[key]
+    if 'price' in body:
+        upd['price'] = float(body['price'])
+    if 'stock' in body:
+        upd['stock'] = int(body['stock'])
+    if 'inStock' in body:
+        upd['inStock'] = bool(body['inStock'])
+
+    if existing:
+        await db.seller_products.update_one({'id': product_id}, {'$set': upd})
+        return clean(await db.seller_products.find_one({'id': product_id}))
+    else:
+        await db.products.update_one({'id': product_id}, {'$set': upd})
+        return clean(await db.products.find_one({'id': product_id}))
+
+
+@api_router.delete("/admin/products/{product_id}")
+async def admin_delete_product(product_id: str, user: dict = Depends(require_admin)):
+    r1 = await db.seller_products.delete_one({'id': product_id})
+    r2 = await db.products.delete_one({'id': product_id})
+    if not r1.deleted_count and not r2.deleted_count:
+        raise HTTPException(status_code=404, detail='Product not found.')
+    return {'ok': True, 'id': product_id}
+
+
 # ---------------------------------------------------------------------------
 # Files
 # ---------------------------------------------------------------------------
@@ -853,6 +1102,15 @@ async def upload_file(file: UploadFile = File(...), user: dict = Depends(get_cur
         'created_at': now_iso(),
     })
     return {'id': file_id, 'filename': file.filename, 'size': result.get('size', len(data))}
+
+
+@api_router.get("/files/{file_id}/view")
+async def view_file_content(file_id: str):
+    doc = await db.files.find_one({'id': file_id, 'is_deleted': False})
+    if not doc:
+        raise HTTPException(status_code=404, detail='File not found')
+    content, ctype = get_object(doc['storage_path'])
+    return Response(content=content, media_type=ctype or 'application/octet-stream')
 
 
 # ---------------------------------------------------------------------------
