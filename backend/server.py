@@ -1595,6 +1595,102 @@ async def wallet_report(user: dict = Depends(require_admin)):
 
 
 # ===========================================================================
+# MARKETPLACE COMMISSION SYSTEM (Admin only)
+# ===========================================================================
+DEFAULT_COMMISSION_SETTINGS = {
+    'id': 'marketplace_commission_settings',
+    'enabled': True,
+    'percentage': 20.0,
+    'updatedAt': datetime.now(timezone.utc).isoformat(),
+    'updatedBy': 'system',
+}
+
+def compute_pricing_logic(seller_price: float, percentage: float, enabled: bool):
+    s_price = round(max(0.0, float(seller_price or 0.0)), 2)
+    pct = round(max(0.0, min(100.0, float(percentage or 0.0))), 2)
+    if enabled and pct > 0:
+        commission_amount = round(s_price * (pct / 100.0), 2)
+        buyer_final_price = round(s_price + commission_amount, 2)
+    else:
+        commission_amount = 0.0
+        buyer_final_price = s_price
+    seller_payout = s_price
+    return {
+        'sellerPrice': s_price,
+        'commissionPercentage': pct,
+        'commissionAmount': commission_amount,
+        'platformEarnings': commission_amount,
+        'buyerFinalPrice': buyer_final_price,
+        'sellerPayout': seller_payout,
+    }
+
+
+@api_router.get("/admin/commission/settings")
+async def get_commission_settings(user: dict = Depends(require_admin)):
+    doc = await db.commission_settings.find_one({'id': 'marketplace_commission_settings'})
+    if not doc:
+        doc = dict(DEFAULT_COMMISSION_SETTINGS)
+        await db.commission_settings.insert_one(dict(doc))
+    return clean(doc)
+
+
+@api_router.put("/admin/commission/settings")
+async def update_commission_settings(body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': now_iso(), 'updatedBy': user.get('email', 'admin')}
+    if 'enabled' in body:
+        upd['enabled'] = bool(body['enabled'])
+    if 'percentage' in body:
+        try:
+            upd['percentage'] = round(max(0.0, min(100.0, float(body['percentage']))), 2)
+        except (ValueError, TypeError):
+            pass
+    await db.commission_settings.update_one({'id': 'marketplace_commission_settings'}, {'$set': upd}, upsert=True)
+    return clean(await db.commission_settings.find_one({'id': 'marketplace_commission_settings'}))
+
+
+@api_router.post("/admin/commission/calculate")
+async def calculate_commission(body: dict, user: dict = Depends(require_admin)):
+    cfg = await db.commission_settings.find_one({'id': 'marketplace_commission_settings'})
+    enabled = cfg.get('enabled', True) if cfg else True
+    pct = cfg.get('percentage', 20.0) if cfg else 20.0
+    if 'percentage' in body:
+        pct = float(body['percentage'])
+    if 'enabled' in body:
+        enabled = bool(body['enabled'])
+    s_price = float(body.get('sellerPrice', 10.0))
+    return compute_pricing_logic(s_price, pct, enabled)
+
+
+@api_router.get("/admin/commission/overview")
+async def get_commission_overview(user: dict = Depends(require_admin)):
+    cfg = await db.commission_settings.find_one({'id': 'marketplace_commission_settings'})
+    enabled = cfg.get('enabled', True) if cfg else True
+    pct = cfg.get('percentage', 20.0) if cfg else 20.0
+
+    products = await db.seller_products.find({'status': {'$ne': 'deleted'}}).limit(50).to_list(50)
+    if not products:
+        products = await db.products.find().limit(20).to_list(20)
+
+    items = []
+    for p in products:
+        s_price = float(p.get('price', 10.0))
+        calc = compute_pricing_logic(s_price, pct, enabled)
+        items.append({
+            'id': p.get('id'),
+            'title': p.get('title', 'Product'),
+            'category': p.get('category', 'General'),
+            **calc
+        })
+
+    example = compute_pricing_logic(10.0, pct, enabled)
+    return {
+        'settings': {'enabled': enabled, 'percentage': pct},
+        'example': example,
+        'items': items,
+    }
+
+
+# ===========================================================================
 # SIGNUP BONUS PROTECTION SYSTEM (Admin & User Endpoints)
 # ===========================================================================
 def _extract_client_meta(request: Request, body_device_id: Optional[str] = None):

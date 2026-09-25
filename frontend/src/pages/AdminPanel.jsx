@@ -9,6 +9,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationsContext';
 import { sellerService, SELLER_CATEGORIES } from '../services/sellerService';
+import { adminService } from '../services/adminService';
 import { useToast } from '../hooks/use-toast';
 import NotificationCenter from '../components/NotificationCenter';
 
@@ -17,6 +18,7 @@ const TABS = [
   { id: 'products', label: 'Product Approvals', Icon: Package },
   { id: 'withdrawals', label: 'Withdraw Management', Icon: Wallet },
   { id: 'sellerMgmt', label: 'Seller Management', Icon: Users },
+  { id: 'commission', label: 'Commission System', Icon: DollarSign },
   { id: 'reviews', label: 'Reviews Management', Icon: Star },
   { id: 'reports', label: 'Reports', Icon: FileText },
 ];
@@ -334,6 +336,7 @@ export default function AdminPanel() {
               onToggleSuspend={handleToggleSuspend}
             />
           )}
+          {tab === 'commission' && <CommissionPanel toast={toast} />}
           {tab === 'reviews' && <PlaceholderPanel Icon={Star} title="Reviews Management" desc="No new reviews flagged. Everything looks good." />}
           {tab === 'reports' && <ReportsPanel apps={applications} prods={products} wds={withdrawals} />}
         </div>
@@ -1105,6 +1108,271 @@ function PlaceholderPanel({ Icon, title, desc }) {
       <div className="mx-auto h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400"><Icon size={18} /></div>
       <h3 className="mt-4 text-white font-semibold">{title}</h3>
       <p className="text-sm text-slate-400 mt-1">{desc}</p>
+    </div>
+  );
+}
+
+function CommissionPanel({ toast }) {
+  const [settings, setSettings] = useState({ enabled: true, percentage: 20 });
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState([]);
+  const [testSellerPrice, setTestSellerPrice] = useState('10.00');
+
+  const loadCommissionData = async () => {
+    try {
+      setLoading(true);
+      const [cfg, overview] = await Promise.all([
+        adminService.commission.getSettings(),
+        adminService.commission.getOverview().catch(() => ({ items: [] })),
+      ]);
+      if (cfg) setSettings(cfg);
+      if (overview?.items) setItems(overview.items);
+    } catch {
+      toast({ title: 'Failed to load commission settings', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCommissionData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSaveSettings = async (e) => {
+    e?.preventDefault();
+    try {
+      setSaving(true);
+      const updated = await adminService.commission.updateSettings({
+        enabled: settings.enabled,
+        percentage: parseFloat(settings.percentage) || 0,
+      });
+      setSettings(updated);
+      toast({ title: 'Commission settings saved successfully' });
+      await loadCommissionData();
+    } catch (err) {
+      toast({ title: 'Failed to update commission settings', description: err.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Live calculation for interactive test card
+  const sPrice = parseFloat(testSellerPrice) || 0;
+  const pct = settings.enabled ? (parseFloat(settings.percentage) || 0) : 0;
+  const platformFee = roundTwo(sPrice * (pct / 100));
+  const buyerPrice = roundTwo(sPrice + platformFee);
+  const sellerPayout = roundTwo(sPrice);
+
+  function roundTwo(val) {
+    return Math.round((val + Number.EPSILON) * 100) / 100;
+  }
+
+  return (
+    <div className="p-5 space-y-6" data-testid="commission-panel">
+      {/* Header & Settings Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Settings Form */}
+        <div className="lg:col-span-1 p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4" data-testid="commission-settings-card">
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <DollarSign size={18} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Admin Commission Settings</h3>
+              <p className="text-[11px] text-slate-400">Configure marketplace platform fee rate</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveSettings} className="space-y-4 pt-2">
+            {/* Enable/Disable Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+              <div>
+                <span className="text-xs font-semibold text-white block">Enable/Disable Commission</span>
+                <span className="text-[10px] text-slate-400">
+                  {settings.enabled ? 'Commission active on buyer purchases' : 'Commission paused (0% fee)'}
+                </span>
+              </div>
+              <button
+                type="button"
+                data-testid="commission-toggle-enabled"
+                onClick={() => setSettings({ ...settings, enabled: !settings.enabled })}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                  settings.enabled ? 'bg-emerald-500' : 'bg-slate-700'
+                }`}
+              >
+                <span
+                  className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                    settings.enabled ? 'translate-x-4' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Percentage Input */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-300 block">Commission Percentage (%)</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  required
+                  data-testid="commission-percentage-input"
+                  value={settings.percentage ?? 20}
+                  onChange={(e) => setSettings({ ...settings, percentage: e.target.value })}
+                  className="w-full bg-[#0a0f1e] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                />
+                <span className="absolute right-3 top-2.5 text-slate-400 text-xs font-mono">%</span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              data-testid="save-commission-settings-btn"
+              disabled={saving}
+              className="w-full py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-all disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save Commission Settings'}
+            </button>
+          </form>
+        </div>
+
+        {/* Pricing Logic & Interactive Example */}
+        <div className="lg:col-span-2 p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4" data-testid="pricing-logic-card">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                Product Pricing Logic & Calculation
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Formula: Buyer Price = Seller Price + (Seller Price × Commission %) | Seller Payout = Seller Price
+              </p>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              Live Rate: {settings.enabled ? `${settings.percentage}%` : 'Disabled (0%)'}
+            </span>
+          </div>
+
+          {/* Interactive Calculator Input */}
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-black/40 border border-white/5">
+            <span className="text-xs text-slate-400 shrink-0">Test Seller Price:</span>
+            <div className="relative w-36">
+              <span className="absolute left-3 top-1.5 text-slate-400 text-xs">$</span>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                data-testid="calc-seller-price-input"
+                value={testSellerPrice}
+                onChange={(e) => setTestSellerPrice(e.target.value)}
+                className="w-full bg-[#0a0f1e] border border-white/10 rounded-lg pl-6 pr-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-400"
+              />
+            </div>
+            <span className="text-[11px] text-slate-500 hidden sm:inline">
+              Adjust amount to test platform fee and buyer final price in real time.
+            </span>
+          </div>
+
+          {/* Live Breakdown Cards (Matching Prompt Exact Format) */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-1">
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5" data-testid="calc-seller-price">
+              <div className="text-[10px] font-mono uppercase text-slate-400">Seller Price</div>
+              <div className="text-base font-extrabold text-white mt-0.5">${sPrice.toFixed(2)}</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5" data-testid="calc-commission-pct">
+              <div className="text-[10px] font-mono uppercase text-slate-400">Commission %</div>
+              <div className="text-base font-extrabold text-sky-400 mt-0.5">{pct}%</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20" data-testid="calc-platform-earnings">
+              <div className="text-[10px] font-mono uppercase text-emerald-300">Platform Fee</div>
+              <div className="text-base font-extrabold text-emerald-400 mt-0.5">+${platformFee.toFixed(2)}</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5" data-testid="calc-buyer-price">
+              <div className="text-[10px] font-mono uppercase text-slate-400">Buyer Price</div>
+              <div className="text-base font-extrabold text-white mt-0.5">${buyerPrice.toFixed(2)}</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 col-span-2 sm:col-span-1" data-testid="calc-seller-payout">
+              <div className="text-[10px] font-mono uppercase text-purple-300">Seller Payout</div>
+              <div className="text-base font-extrabold text-purple-400 mt-0.5">${sellerPayout.toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Admin View: Pricing Breakdown Table */}
+      <div className="space-y-3 pt-2" data-testid="commission-admin-view-table">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-white">Admin View: Product Commission & Payout Breakdown</h3>
+            <p className="text-[11px] text-slate-400">
+              Live calculation of Seller Price, Commission %, Platform Earnings, and Seller Payout for marketplace catalog items.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={loadCommissionData}
+            className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-white"
+            title="Refresh"
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+
+        <div className="overflow-auto rounded-xl border border-white/5">
+          <table className="w-full text-xs">
+            <thead className="text-[10px] uppercase font-mono tracking-wider text-slate-400 bg-white/[0.03]">
+              <tr>
+                <th className="text-left py-3 px-4">Product / Item</th>
+                <th className="text-left" data-testid="col-seller-price">Seller Price</th>
+                <th className="text-left" data-testid="col-commission-pct">Commission %</th>
+                <th className="text-left" data-testid="col-platform-earnings">Platform Earnings</th>
+                <th className="text-left" data-testid="col-seller-payout">Seller Payout</th>
+                <th className="text-right px-4" data-testid="col-buyer-price">Buyer Final Price</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {items.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-6 text-center text-slate-500">
+                    No products available for commission calculation.
+                  </td>
+                </tr>
+              ) : (
+                items.map((item) => (
+                  <tr key={item.id} className="hover:bg-white/[0.02] transition-colors" data-testid={`commission-row-${item.id}`}>
+                    <td className="py-3 px-4">
+                      <div className="font-semibold text-white">{item.title}</div>
+                      <div className="text-[10px] text-slate-500">{item.category}</div>
+                    </td>
+                    <td className="font-mono font-medium text-slate-200">
+                      ${Number(item.sellerPrice || 0).toFixed(2)}
+                    </td>
+                    <td className="font-mono text-sky-400">
+                      {item.commissionPercentage}%
+                    </td>
+                    <td className="font-mono font-bold text-emerald-400">
+                      +${Number(item.platformEarnings || 0).toFixed(2)}
+                    </td>
+                    <td className="font-mono text-purple-300">
+                      ${Number(item.sellerPayout || 0).toFixed(2)}
+                    </td>
+                    <td className="text-right px-4 font-mono font-bold text-white">
+                      ${Number(item.buyerFinalPrice || 0).toFixed(2)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

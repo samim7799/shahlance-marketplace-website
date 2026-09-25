@@ -56,4 +56,11 @@ export const adminService = {
     update: (id, body) => api.put(`/admin/products/${id}`, body).then((r) => r.data),
     delete: (id) => api.delete(`/admin/products/${id}`).then((r) => r.data),
   },
+
+  commission: {
+    getSettings: () => api.get('/admin/commission/settings').then((r) => r.data),
+    updateSettings: (body) => api.put('/admin/commission/settings', body).then((r) => r.data),
+    getOverview: () => api.get('/admin/commission/overview').then((r) => r.data),
+    calculate: (body) => api.post('/admin/commission/calculate', body).then((r) => r.data),
+  },
 };
