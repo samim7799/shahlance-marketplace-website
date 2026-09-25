@@ -70,6 +70,23 @@ Continue development of an existing GitHub project (samim7788/shahlance-web-dev)
   * Stock management with numeric stock count and In-Stock / Out-of-Stock badge indicators
 - Verified: backend test suite (3/3 PASS in `test_seller_product_mgmt.py`), full non-admin authorization gating (403 Forbidden verified for buyer role), and 100% frontend targeted flows verified via Playwright.
 
+## Implemented (Sep 2026 — Marketplace Commission System)
+- Added dedicated Marketplace Commission module in backend (`server.py`) and frontend (`AdminPanel.jsx` Commission System tab):
+  * Admin Commission Settings: Enable/Disable commission toggle, Commission percentage setting (e.g. 20.0%), and persistent DB configuration.
+  * Product Pricing Logic Engine:
+    - Seller Price: Base price set by vendor (e.g. $10.00)
+    - Commission %: Platform fee rate (e.g. 20%)
+    - Platform fee / Commission Amount: `round(Seller Price * (Percentage / 100), 2)` (e.g. $2.00)
+    - Buyer Final Price: `Seller Price + Platform Fee` (e.g. $12.00)
+    - Seller Payout: `Seller Price` (e.g. $10.00)
+    - Disabled state: When disabled, commission is $0.00, buyer price equals seller price, seller payout equals seller price.
+  * Admin View:
+    - Commission Settings configuration card with instant save
+    - Real-time Interactive Calculator with live test input
+    - Product Commission & Payout Breakdown table displaying: Product / Item, Seller Price, Commission %, Platform Earnings, Seller Payout, and Buyer Final Price across marketplace items.
+  * Endpoints: `GET /api/admin/commission/settings`, `PUT /api/admin/commission/settings`, `POST /api/admin/commission/calculate`, `GET /api/admin/commission/overview`.
+- Verified: backend test suite (4/4 PASS in `test_commission_system.py`), non-admin 403 gating, and 100% frontend targeted flows verified via Playwright.
+
 ## Backlog / next
 - P1: Wire live Cryptomus/NOWPayments payment creation + webhooks using the stored gateway configs (needs real merchant API keys from user); connect Accounts payment UI to a real gateway.
 - P1: Bring seller-uploaded (approved) products into the public marketplace listing (replace/augment mock catalog with GET /api/seller/products?status=approved) so the whole catalog is DB-backed and searchable.

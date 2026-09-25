@@ -1,0 +1,15 @@
+{
+  "summary": "Tested Marketplace Commission System (backend + frontend). Backend: 4/4 pytest tests passed for /api/admin/commission/{settings,calculate,overview} including non-admin 403 gating, exact prompt example (Seller $10, 20% -> Platform $2, Buyer $12, Payout $10), and disabled-commission logic. Frontend: /admin?tab=commission renders CommissionPanel with settings card (toggle + percentage input + save), interactive Product Pricing Logic calculator producing exact values live, and Admin View table with Seller Price, Commission %, Platform Earnings, Seller Payout, Buyer Final Price columns populated for real marketplace catalog items.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_commission_system.py", "/app/test_reports/pytest/commission_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Admin rajavai247@gmail.com / Amijanina7799@@ ; Buyer qabuyer@example.com / NewPass456!",
+  "seed_data_creation": "None. Reused existing marketplace catalog for admin view breakdown.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Commission endpoints stable. UI uses data-testids: commission-panel, commission-toggle-enabled, commission-percentage-input, save-commission-settings-btn, commission-calc-seller-price (input), calc-commission-pct, commission-admin-view-table, commission-row-<productId>. Auth via ?auth_token= query param works on /admin route."
+}
