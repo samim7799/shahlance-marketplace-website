@@ -40,6 +40,21 @@ Continue development of an existing GitHub project (samim7788/shahlance-web-dev)
 - Advanced Wallet: `POST /api/admin/wallet/adjust` (credit/debit/bonus, amount>0, mandatory note, overdraft guard, logs `wallet_transactions` with note/adminId/balanceAfter, updates `users.walletBalance`); `GET /api/admin/wallet/report` (total balances, totals/counts by type, recent txns).
 - Verified: testing_agent iteration_5 → backend 20/20 PASS (1 skip: no completed txns exist to refund), frontend all flows PASS incl. regression of Overview/Users/SMS tabs. QA buyer wallet now $63 (test adjustments).
 
+## Implemented (Sep 2026 — Signup Bonus Protection System)
+- Added dedicated Signup Bonus Protection System module (`/app/backend/bonus_protection.py` and `/app/frontend/src/components/admin/BonusProtectionSection.jsx`).
+- Admin Bonus Settings: Enable/Disable Signup Bonus switch, Bonus Amount configuration, Require First Purchase (ON/OFF), Minimum Purchase Amount threshold.
+- Bonus Fraud Protection Engine:
+  * Hardware & browser device fingerprint ledger: one device can receive bonus only once; reuse flags account as suspicious.
+  * Verified email requirement: bonuses withheld until user email verification passes.
+  * Duplicate account detection across existing user data: detects shared phone numbers, duplicate IP/subnets, disposable/temporary email domains (@tempmail, etc.), plus-addressing aliases, and identical full-name clusters.
+  * Automatic flagging: suspicious accounts are flagged (`isSuspicious: true`) and bonuses held in `pending_review` without breaking normal buyer/seller marketplace navigation.
+- Admin Controls & Triage Panel:
+  * Bonus History table with search, status filtering, and device/IP audit logs.
+  * User Bonus Status directory with live wallet balances, verification pills, and bonus statuses.
+  * Suspicious User List triage console with real-time fraud trigger breakdown and quick action buttons: Approve Bonus (credits wallet + logs wallet transaction), Reject Bonus, and Clear Suspicion Flag.
+  * Live status endpoint `GET /api/bonus/status`, `POST /api/bonus/evaluate`, `POST /api/bonus/verify-email`, `POST /api/bonus/verify-phone`.
+- Verified: backend test suite (8/8 PASS in `test_bonus_protection.py`), full regression passed (20/20 in `test_wallet_payments.py`), frontend verified end-to-end via automated testing and desktop/mobile verification.
+
 ## Backlog / next
 - P1: Wire live Cryptomus/NOWPayments payment creation + webhooks using the stored gateway configs (needs real merchant API keys from user); connect Accounts payment UI to a real gateway.
 - P1: Bring seller-uploaded (approved) products into the public marketplace listing (replace/augment mock catalog with GET /api/seller/products?status=approved) so the whole catalog is DB-backed and searchable.

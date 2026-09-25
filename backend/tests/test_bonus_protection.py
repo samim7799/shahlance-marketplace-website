@@ -58,6 +58,16 @@ def _register_user(fullName=None, username_prefix="buser", email_prefix="buser",
     return r.json()["token"], r.json()["user"]
 
 
+def test_non_admin_forbidden_on_admin_endpoints():
+    token, _ = _register_user()
+    hdr = _h(token)
+    for path in ["/admin/bonus/settings", "/admin/bonus/history", "/admin/bonus/user-status", "/admin/bonus/suspicious-users"]:
+        r = requests.get(f"{API}{path}", headers=hdr, timeout=10)
+        assert r.status_code == 403, f"{path} expected 403 got {r.status_code}"
+    r = requests.post(f"{API}/admin/bonus/review", json={"action": "approve", "bonusId": "x"}, headers=hdr, timeout=10)
+    assert r.status_code == 403
+
+
 def test_public_bonus_status():
     r = requests.get(f"{API}/bonus/status", timeout=10)
     assert r.status_code == 200
