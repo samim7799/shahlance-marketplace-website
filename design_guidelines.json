@@ -1,0 +1,82 @@
+{
+  "project_title": "Signup Bonus Protection System - Design Guidelines",
+  "design_archetype": "ARCHETYPE 4: SWISS & HIGH-CONTRAST + PERFORMANCE DATA DENSITY",
+  "theme": "Dark Command Center / High-Contrast Fraud Control",
+  "typography": {
+    "font_family_heading": "Cabinet Grotesk, Outfit, sans-serif",
+    "font_family_body": "Inter, system-ui, sans-serif",
+    "font_family_mono": "JetBrains Mono, Source Code Pro, monospace",
+    "hierarchy": {
+      "h1": "text-3xl sm:text-4xl font-bold tracking-tight text-slate-100",
+      "h2": "text-xl sm:text-2xl font-semibold tracking-tight text-slate-200",
+      "h3": "text-lg font-medium text-slate-200",
+      "body": "text-sm text-slate-300 leading-relaxed",
+      "caption": "text-xs font-mono tracking-wider uppercase text-slate-400"
+    }
+  },
+  "colors": {
+    "background": "#090d16",
+    "surface": "#111827",
+    "surface_hover": "#1f2937",
+    "border": "#1e293b",
+    "border_highlight": "#334155",
+    "primary": "#3b82f6",
+    "primary_hover": "#2563eb",
+    "accent_warning": "#f59e0b",
+    "accent_danger": "#ef4444",
+    "accent_success": "#10b981",
+    "accent_suspicious": "#f97316",
+    "text_primary": "#f8fafc",
+    "text_secondary": "#94a3b8",
+    "text_muted": "#64748b",
+    "forbidden_colors": ["#7351B7", "#1B93A4"]
+  },
+  "visual_enhancers": {
+    "card_style": "Flat slate surfaces with 1px subtle borders (border-slate-800/80), dark glassmorphism (backdrop-blur-md bg-slate-900/80)",
+    "badges": "High-contrast status tags with subtle glowing borders and crisp uppercase text",
+    "data_density": "MODE B High Density Grid for security monitoring, tabular drilldown drawers, clear metrics callout",
+    "textures": "Subtle dark slate grid lines, status dots with soft pulse animation"
+  },
+  "components": {
+    "bonus_settings_panel": "Card container with clean switches, numerical input fields for bonus limits and purchase thresholds, data-testid attributes on all controls",
+    "fraud_protection_rules": "Interactive check toggle grid (Device Fingerprint, IP Subnet, Verified Email/Phone, Multi-Account Detection)",
+    "bonus_history_table": "Data-dense Shadcn Table with sorting, status badges, user metadata tooltip, filter tabs",
+    "suspicious_user_list": "Dedicated security triage panel with quick review actions (Approve Bonus, Reject & Ban, Hold for Review)",
+    "json_drawer": "Slide-over sheet with JetBrains Mono preview for fraud triggers & device fingerprint comparison"
+  },
+  "grids_and_layouts": {
+    "layout_mode": "MODE B: High Density Admin Grid",
+    "base_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6",
+    "header_spacing": "pt-6 pb-4 px-4 sm:px-8 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40"
+  },
+  "motion_and_interactions": {
+    "micro_interactions": "Smooth transition-colors duration-200, hover lift (-translate-y-0.5) on action buttons",
+    "status_pulse": "Soft relative ping indicator for active suspicious flags",
+    "rule_transitions": "AnimatePresence for expand/collapse of fraud rule config panels"
+  },
+  "accessibility": {
+    "contrast": "APCA & WCAG AA compliant contrast ratio (minimum 4.5:1 for body, 3:1 for large headers)",
+    "focus_states": "ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-950 focus:outline-none",
+    "testing_attribute": "CRITICAL: All interactive elements, inputs, action buttons, status pills, and tables MUST contain data-testid attributes using kebab-case role naming."
+  },
+  "image_urls": {
+    "admin_avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+    "security_shield_icon_bg": "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80"
+  },
+  "instructions_to_main_agent": [
+    "1. Keep existing buyer/seller/admin views, authentication, wallet, and payment systems intact.",
+    "2. Add the Bonus Protection System as a modular tab or section in the existing Admin dashboard.",
+    "3. Ensure all backend endpoints (/api/admin/bonus-settings, /api/admin/bonus-history, /api/admin/suspicious-users, /api/admin/verify-bonus-action) match exact required parameters.",
+    "4. Ensure every button, input, toggle, tab, table row, and badge includes a descriptive data-testid attribute.",
+    "5. Use dark mode palette specified in guidelines with zero pure black (#000000) backgrounds; prefer deep slate (#090d16 and #111827).",
+    "6. Front-end code files are React .js files."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Do not modify existing authentication.",
+    "Do not change Buyer/Seller/Admin View.",
+    "Do not change wallet, payment, order, database structure, or existing features.",
+    "All interactive elements MUST include data-testid attributes.",
+    "Use sonner for notifications and toasts.",
+    "Never use generic centered layouts or unstyled default HTML dropdowns/inputs."
+  ]
+}
