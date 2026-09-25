@@ -91,4 +91,25 @@ export const adminService = {
 
     listGcOrders: () => api.get('/admin/digital/gift-card-orders').then((r) => r.data),
   },
+
+  cms: {
+    getSettings: () => api.get('/admin/cms/settings').then((r) => r.data),
+    updateSettings: (b) => api.put('/admin/cms/settings', b).then((r) => r.data),
+    listPages: () => api.get('/admin/cms/pages').then((r) => r.data),
+    createPage: (b) => api.post('/admin/cms/pages', b).then((r) => r.data),
+    updatePage: (id, b) => api.put(`/admin/cms/pages/${id}`, b).then((r) => r.data),
+    deletePage: (id) => api.delete(`/admin/cms/pages/${id}`).then((r) => r.data),
+  },
+
+  reports: {
+    getDashboard: () => api.get('/admin/reports/dashboard').then((r) => r.data),
+  },
+
+  security: {
+    getActivityLogs: () => api.get('/admin/security/activity-logs').then((r) => r.data),
+    logActivity: (b) => api.post('/admin/security/activity-logs', b).then((r) => r.data),
+    getLoginHistory: () => api.get('/admin/security/login-history').then((r) => r.data),
+    getSettings: () => api.get('/admin/security/settings').then((r) => r.data),
+    updateSettings: (b) => api.put('/admin/security/settings', b).then((r) => r.data),
+  },
 };

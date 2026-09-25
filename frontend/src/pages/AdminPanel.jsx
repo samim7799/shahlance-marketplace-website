@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ShieldCheck, Users, Package, Wallet, Star, FileText, CheckCircle2, XCircle,
   Clock, TrendingUp, BarChart3, Plus, Edit2, Trash2, Eye, Ban, Check, X, Upload,
-  Image as ImageIcon, DollarSign, Layers, AlertTriangle, RefreshCw
+  Image as ImageIcon, DollarSign, Layers, AlertTriangle, RefreshCw, Shield
 } from 'lucide-react';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,6 +13,7 @@ import { adminService } from '../services/adminService';
 import { useToast } from '../hooks/use-toast';
 import NotificationCenter from '../components/NotificationCenter';
 import DigitalProductManagementPanel from '../components/admin/DigitalProductManagementPanel';
+import AdvancedAdminToolsPanel from '../components/admin/AdvancedAdminToolsPanel';
 
 const TABS = [
   { id: 'sellers', label: 'Seller Applications', Icon: ShieldCheck },
@@ -21,8 +22,9 @@ const TABS = [
   { id: 'withdrawals', label: 'Withdraw Management', Icon: Wallet },
   { id: 'sellerMgmt', label: 'Seller Management', Icon: Users },
   { id: 'commission', label: 'Commission System', Icon: DollarSign },
+  { id: 'adminTools', label: 'Advanced Admin Tools', Icon: Shield },
   { id: 'reviews', label: 'Reviews Management', Icon: Star },
-  { id: 'reports', label: 'Reports', Icon: FileText },
+  { id: 'reports', label: 'Reports Dashboard', Icon: BarChart3 },
 ];
 
 export default function AdminPanel() {
@@ -340,8 +342,9 @@ export default function AdminPanel() {
           )}
           {tab === 'commission' && <CommissionPanel toast={toast} />}
           {tab === 'digitalProducts' && <DigitalProductManagementPanel toast={toast} />}
+          {tab === 'adminTools' && <AdvancedAdminToolsPanel defaultSection="cms" toast={toast} />}
+          {tab === 'reports' && <AdvancedAdminToolsPanel defaultSection="reports" toast={toast} />}
           {tab === 'reviews' && <PlaceholderPanel Icon={Star} title="Reviews Management" desc="No new reviews flagged. Everything looks good." />}
-          {tab === 'reports' && <ReportsPanel apps={applications} prods={products} wds={withdrawals} />}
         </div>
 
         {/* Product Add/Edit Modal */}

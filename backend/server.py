@@ -29,6 +29,7 @@ from catalog_seed import build_seed_products, CATEGORIES as SEED_CATEGORIES, CAT
 import email_service
 import bonus_protection
 import digital_products
+import advanced_admin_tools
 
 CATEGORY_COLOR = {c['id']: c['color'] for c in SEED_CATEGORIES}
 CATEGORY_ICON = {c['id']: c['icon'] for c in SEED_CATEGORIES}
@@ -1596,6 +1597,216 @@ async def wallet_report(user: dict = Depends(require_admin)):
 
 
 # ===========================================================================
+# ADVANCED ADMIN TOOLS (CMS Management, Reports Dashboard, Security Tools)
+# ===========================================================================
+
+# ----------------- 1. CMS Management -----------------
+@api_router.get("/admin/cms/settings")
+async def get_cms_settings(user: dict = Depends(require_admin)):
+    doc = await db.cms_settings.find_one({'id': 'site_cms_settings'})
+    if not doc:
+        doc = dict(advanced_admin_tools.DEFAULT_CMS_SETTINGS)
+        await db.cms_settings.insert_one(dict(doc))
+    return advanced_admin_tools.clean_doc(doc)
+
+@api_router.put("/admin/cms/settings")
+async def update_cms_settings(request: Request, body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': advanced_admin_tools.now_iso(), 'updatedBy': user.get('email', 'admin')}
+    for k in ['logo', 'banner', 'homepageContent']:
+        if k in body:
+            upd[k] = body[k]
+    await db.cms_settings.update_one({'id': 'site_cms_settings'}, {'$set': upd}, upsert=True)
+    # Log admin action
+    _, ip = _extract_client_meta(request)
+    await db.admin_activity_logs.insert_one({
+        'id': f"act_{uuid.uuid4().hex[:8]}",
+        'adminEmail': user.get('email', 'admin'),
+        'action': 'Updated CMS Settings',
+        'details': 'Modified logo, banner, or homepage content',
+        'ipAddress': ip or '127.0.0.1',
+        'createdAt': advanced_admin_tools.now_iso(),
+    })
+    return advanced_admin_tools.clean_doc(await db.cms_settings.find_one({'id': 'site_cms_settings'}))
+
+@api_router.get("/admin/cms/pages")
+async def list_cms_pages(user: dict = Depends(require_admin)):
+    pages = await db.cms_pages.find().sort('createdAt', -1).to_list(100)
+    return [advanced_admin_tools.clean_doc(p) for p in pages]
+
+@api_router.post("/admin/cms/pages")
+async def create_cms_page(request: Request, body: dict, user: dict = Depends(require_admin)):
+    title = (body.get('title') or '').strip()
+    if not title:
+        raise HTTPException(status_code=400, detail='Page title is required')
+    slug = (body.get('slug') or '').strip() or title.lower().replace(' ', '-')
+    doc = {
+        'id': f"page_{uuid.uuid4().hex[:8]}",
+        'title': title,
+        'slug': slug,
+        'content': (body.get('content') or '').strip(),
+        'status': body.get('status', 'published'),
+        'createdAt': advanced_admin_tools.now_iso(),
+        'updatedAt': advanced_admin_tools.now_iso(),
+    }
+    await db.cms_pages.insert_one(doc)
+    _, ip = _extract_client_meta(request)
+    await db.admin_activity_logs.insert_one({
+        'id': f"act_{uuid.uuid4().hex[:8]}",
+        'adminEmail': user.get('email', 'admin'),
+        'action': f"Created CMS Page '{title}'",
+        'details': f"Status: {doc['status']}, Slug: {slug}",
+        'ipAddress': ip or '127.0.0.1',
+        'createdAt': advanced_admin_tools.now_iso(),
+    })
+    return advanced_admin_tools.clean_doc(doc)
+
+@api_router.put("/admin/cms/pages/{page_id}")
+async def update_cms_page(request: Request, page_id: str, body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': advanced_admin_tools.now_iso()}
+    for k in ['title', 'slug', 'content', 'status']:
+        if k in body:
+            upd[k] = body[k]
+    res = await db.cms_pages.update_one({'id': page_id}, {'$set': upd})
+    if not res.matched_count:
+        raise HTTPException(status_code=404, detail='Page not found')
+    _, ip = _extract_client_meta(request)
+    await db.admin_activity_logs.insert_one({
+        'id': f"act_{uuid.uuid4().hex[:8]}",
+        'adminEmail': user.get('email', 'admin'),
+        'action': f"Updated CMS Page '{page_id}'",
+        'details': f"Updated fields: {list(body.keys())}",
+        'ipAddress': ip or '127.0.0.1',
+        'createdAt': advanced_admin_tools.now_iso(),
+    })
+    return advanced_admin_tools.clean_doc(await db.cms_pages.find_one({'id': page_id}))
+
+@api_router.delete("/admin/cms/pages/{page_id}")
+async def delete_cms_page(request: Request, page_id: str, user: dict = Depends(require_admin)):
+    res = await db.cms_pages.delete_one({'id': page_id})
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail='Page not found')
+    _, ip = _extract_client_meta(request)
+    await db.admin_activity_logs.insert_one({
+        'id': f"act_{uuid.uuid4().hex[:8]}",
+        'adminEmail': user.get('email', 'admin'),
+        'action': f"Deleted CMS Page '{page_id}'",
+        'details': 'Page deleted from system',
+        'ipAddress': ip or '127.0.0.1',
+        'createdAt': advanced_admin_tools.now_iso(),
+    })
+    return {'ok': True, 'id': page_id}
+
+
+# ----------------- 2. Reports Dashboard -----------------
+@api_router.get("/admin/reports/dashboard")
+async def get_reports_dashboard(user: dict = Depends(require_admin)):
+    # 1. Orders & Sales
+    orders = await db.orders.find().to_list(2000)
+    paid_orders = [o for o in orders if o.get('paymentStatus') == 'paid']
+    total_sales = sum(float(o.get('price', 0)) for o in paid_orders)
+    order_count = len(orders)
+
+    # 2. Commission & Profit Report
+    cfg = await db.commission_settings.find_one({'id': 'marketplace_commission_settings'})
+    comm_pct = cfg.get('percentage', 20.0) if cfg and cfg.get('enabled', True) else 0.0
+    platform_profit = round(total_sales * (comm_pct / 100.0), 2)
+
+    # 3. User Growth
+    total_users = await db.users.count_documents({})
+    # New users in last 30 days
+    thirty_days_ago = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    new_users = await db.users.count_documents({'createdAt': {'$gte': thirty_days_ago}})
+    if new_users == 0:
+        new_users = total_users
+
+    # 4. Service Analytics (Usage by Category & Order Statistics)
+    category_counts = {}
+    for p in await db.seller_products.find().to_list(1000):
+        c = p.get('category', 'General')
+        category_counts[c] = category_counts.get(c, 0) + 1
+
+    order_stats = {
+        'paid': len(paid_orders),
+        'pending': len([o for o in orders if o.get('paymentStatus') == 'pending']),
+        'other': len([o for o in orders if o.get('paymentStatus') not in ('paid', 'pending')]),
+    }
+
+    return {
+        'salesReport': {
+            'totalSales': round(total_sales, 2),
+            'orderCount': order_count,
+            'paidOrderCount': len(paid_orders),
+            'averageOrderValue': round(total_sales / len(paid_orders), 2) if paid_orders else 0.0,
+        },
+        'profitReport': {
+            'platformProfit': platform_profit,
+            'commissionPercentage': comm_pct,
+            'commissionSummary': f"{comm_pct}% active commission rate generating ${platform_profit:.2f} platform revenue",
+        },
+        'userGrowth': {
+            'totalUsers': total_users,
+            'newUsers': new_users,
+            'growthRate': f"+{round((new_users / max(1, total_users)) * 100, 1)}%",
+        },
+        'serviceAnalytics': {
+            'serviceUsageCount': category_counts,
+            'orderStatistics': order_stats,
+        }
+    }
+
+
+# ----------------- 3. Security Tools -----------------
+@api_router.get("/admin/security/activity-logs")
+async def get_admin_activity_logs(user: dict = Depends(require_admin)):
+    logs = await db.admin_activity_logs.find().sort('createdAt', -1).limit(100).to_list(100)
+    return [advanced_admin_tools.clean_doc(l) for l in logs]
+
+@api_router.post("/admin/security/activity-logs")
+async def create_admin_activity_log(request: Request, body: dict, user: dict = Depends(require_admin)):
+    _, ip = _extract_client_meta(request)
+    doc = {
+        'id': f"act_{uuid.uuid4().hex[:8]}",
+        'adminEmail': user.get('email', 'admin'),
+        'action': body.get('action', 'Manual Audit Event'),
+        'details': body.get('details', ''),
+        'ipAddress': ip or '127.0.0.1',
+        'createdAt': advanced_admin_tools.now_iso(),
+    }
+    await db.admin_activity_logs.insert_one(doc)
+    return advanced_admin_tools.clean_doc(doc)
+
+@api_router.get("/admin/security/login-history")
+async def get_admin_login_history(user: dict = Depends(require_admin)):
+    history = await db.admin_login_history.find().sort('createdAt', -1).limit(100).to_list(100)
+    return [advanced_admin_tools.clean_doc(h) for h in history]
+
+@api_router.get("/admin/security/settings")
+async def get_security_settings(user: dict = Depends(require_admin)):
+    doc = await db.security_settings.find_one({'id': 'admin_security_settings'})
+    if not doc:
+        doc = dict(advanced_admin_tools.DEFAULT_SECURITY_SETTINGS)
+        await db.security_settings.insert_one(dict(doc))
+    return advanced_admin_tools.clean_doc(doc)
+
+@api_router.put("/admin/security/settings")
+async def update_security_settings(request: Request, body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': advanced_admin_tools.now_iso(), 'updatedBy': user.get('email', 'admin')}
+    if 'twoFactorAuthEnabled' in body:
+        upd['twoFactorAuthEnabled'] = bool(body['twoFactorAuthEnabled'])
+    await db.security_settings.update_one({'id': 'admin_security_settings'}, {'$set': upd}, upsert=True)
+    _, ip = _extract_client_meta(request)
+    await db.admin_activity_logs.insert_one({
+        'id': f"act_{uuid.uuid4().hex[:8]}",
+        'adminEmail': user.get('email', 'admin'),
+        'action': f"Toggled 2FA Setting: {upd.get('twoFactorAuthEnabled')}",
+        'details': 'Updated Admin Two-Factor Authentication policy',
+        'ipAddress': ip or '127.0.0.1',
+        'createdAt': advanced_admin_tools.now_iso(),
+    })
+    return advanced_admin_tools.clean_doc(await db.security_settings.find_one({'id': 'admin_security_settings'}))
+
+
+# ===========================================================================
 # DIGITAL PRODUCT MANAGEMENT (Subscriptions & Gift Cards - Admin only)
 # ===========================================================================
 # --- Subscription Categories ---
@@ -2250,6 +2461,12 @@ async def startup():
         logger.info("Digital products initial seed verified")
     except Exception as e:
         logger.warning(f"digital products seed warning: {e}")
+    # Advanced Admin Tools initial seed
+    try:
+        await advanced_admin_tools.ensure_initial_seed(db)
+        logger.info("Advanced admin tools seed verified")
+    except Exception as e:
+        logger.warning(f"advanced admin tools seed warning: {e}")
 
 
 @app.on_event("shutdown")
