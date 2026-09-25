@@ -63,4 +63,32 @@ export const adminService = {
     getOverview: () => api.get('/admin/commission/overview').then((r) => r.data),
     calculate: (body) => api.post('/admin/commission/calculate', body).then((r) => r.data),
   },
+
+  digital: {
+    // Subscriptions
+    listSubCategories: () => api.get('/admin/digital/subscription-categories').then((r) => r.data),
+    createSubCategory: (b) => api.post('/admin/digital/subscription-categories', b).then((r) => r.data),
+    updateSubCategory: (id, b) => api.put(`/admin/digital/subscription-categories/${id}`, b).then((r) => r.data),
+    deleteSubCategory: (id) => api.delete(`/admin/digital/subscription-categories/${id}`).then((r) => r.data),
+
+    listSubProducts: () => api.get('/admin/digital/subscription-products').then((r) => r.data),
+    createSubProduct: (b) => api.post('/admin/digital/subscription-products', b).then((r) => r.data),
+    updateSubProduct: (id, b) => api.put(`/admin/digital/subscription-products/${id}`, b).then((r) => r.data),
+    deleteSubProduct: (id) => api.delete(`/admin/digital/subscription-products/${id}`).then((r) => r.data),
+
+    listSubOrders: () => api.get('/admin/digital/subscription-orders').then((r) => r.data),
+
+    // Gift Cards
+    listGcBrands: () => api.get('/admin/digital/gift-card-brands').then((r) => r.data),
+    createGcBrand: (b) => api.post('/admin/digital/gift-card-brands', b).then((r) => r.data),
+    updateGcBrand: (id, b) => api.put(`/admin/digital/gift-card-brands/${id}`, b).then((r) => r.data),
+    deleteGcBrand: (id) => api.delete(`/admin/digital/gift-card-brands/${id}`).then((r) => r.data),
+
+    listGiftCards: () => api.get('/admin/digital/gift-cards').then((r) => r.data),
+    createGiftCard: (b) => api.post('/admin/digital/gift-cards', b).then((r) => r.data),
+    updateGiftCard: (id, b) => api.put(`/admin/digital/gift-cards/${id}`, b).then((r) => r.data),
+    deleteGiftCard: (id) => api.delete(`/admin/digital/gift-cards/${id}`).then((r) => r.data),
+
+    listGcOrders: () => api.get('/admin/digital/gift-card-orders').then((r) => r.data),
+  },
 };

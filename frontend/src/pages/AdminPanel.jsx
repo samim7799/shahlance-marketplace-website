@@ -12,10 +12,12 @@ import { sellerService, SELLER_CATEGORIES } from '../services/sellerService';
 import { adminService } from '../services/adminService';
 import { useToast } from '../hooks/use-toast';
 import NotificationCenter from '../components/NotificationCenter';
+import DigitalProductManagementPanel from '../components/admin/DigitalProductManagementPanel';
 
 const TABS = [
   { id: 'sellers', label: 'Seller Applications', Icon: ShieldCheck },
   { id: 'products', label: 'Product Approvals', Icon: Package },
+  { id: 'digitalProducts', label: 'Digital Products', Icon: Layers },
   { id: 'withdrawals', label: 'Withdraw Management', Icon: Wallet },
   { id: 'sellerMgmt', label: 'Seller Management', Icon: Users },
   { id: 'commission', label: 'Commission System', Icon: DollarSign },
@@ -337,6 +339,7 @@ export default function AdminPanel() {
             />
           )}
           {tab === 'commission' && <CommissionPanel toast={toast} />}
+          {tab === 'digitalProducts' && <DigitalProductManagementPanel toast={toast} />}
           {tab === 'reviews' && <PlaceholderPanel Icon={Star} title="Reviews Management" desc="No new reviews flagged. Everything looks good." />}
           {tab === 'reports' && <ReportsPanel apps={applications} prods={products} wds={withdrawals} />}
         </div>

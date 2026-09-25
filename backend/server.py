@@ -28,6 +28,7 @@ from emergentintegrations.payments.stripe.checkout import (
 from catalog_seed import build_seed_products, CATEGORIES as SEED_CATEGORIES, CATEGORY_NAME_TO_ID
 import email_service
 import bonus_protection
+import digital_products
 
 CATEGORY_COLOR = {c['id']: c['color'] for c in SEED_CATEGORIES}
 CATEGORY_ICON = {c['id']: c['icon'] for c in SEED_CATEGORIES}
@@ -1595,6 +1596,221 @@ async def wallet_report(user: dict = Depends(require_admin)):
 
 
 # ===========================================================================
+# DIGITAL PRODUCT MANAGEMENT (Subscriptions & Gift Cards - Admin only)
+# ===========================================================================
+# --- Subscription Categories ---
+@api_router.get("/admin/digital/subscription-categories")
+async def list_sub_categories(user: dict = Depends(require_admin)):
+    cats = await db.digital_subscription_categories.find().sort('name', 1).to_list(100)
+    return [digital_products.clean_doc(c) for c in cats]
+
+@api_router.post("/admin/digital/subscription-categories")
+async def create_sub_category(body: dict, user: dict = Depends(require_admin)):
+    name = (body.get('name') or '').strip()
+    if not name:
+        raise HTTPException(status_code=400, detail='Category name is required')
+    doc = {
+        'id': f"subcat_{uuid.uuid4().hex[:8]}",
+        'name': name,
+        'description': (body.get('description') or '').strip(),
+        'createdAt': digital_products.now_iso(),
+        'updatedAt': digital_products.now_iso(),
+    }
+    await db.digital_subscription_categories.insert_one(doc)
+    return digital_products.clean_doc(doc)
+
+@api_router.put("/admin/digital/subscription-categories/{cat_id}")
+async def update_sub_category(cat_id: str, body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': digital_products.now_iso()}
+    if 'name' in body:
+        upd['name'] = (body['name'] or '').strip()
+    if 'description' in body:
+        upd['description'] = (body['description'] or '').strip()
+    res = await db.digital_subscription_categories.update_one({'id': cat_id}, {'$set': upd})
+    if not res.matched_count:
+        raise HTTPException(status_code=404, detail='Category not found')
+    return digital_products.clean_doc(await db.digital_subscription_categories.find_one({'id': cat_id}))
+
+@api_router.delete("/admin/digital/subscription-categories/{cat_id}")
+async def delete_sub_category(cat_id: str, user: dict = Depends(require_admin)):
+    res = await db.digital_subscription_categories.delete_one({'id': cat_id})
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail='Category not found')
+    return {'ok': True, 'id': cat_id}
+
+# --- Subscription Products & Plans ---
+@api_router.get("/admin/digital/subscription-products")
+async def list_sub_products(user: dict = Depends(require_admin)):
+    prods = await db.digital_subscription_products.find().sort('createdAt', -1).to_list(200)
+    return [digital_products.clean_doc(p) for p in prods]
+
+@api_router.post("/admin/digital/subscription-products")
+async def create_sub_product(body: dict, user: dict = Depends(require_admin)):
+    title = (body.get('title') or '').strip()
+    if not title:
+        raise HTTPException(status_code=400, detail='Product title is required')
+    plans = body.get('plans') or []
+    doc = {
+        'id': f"subprod_{uuid.uuid4().hex[:8]}",
+        'title': title,
+        'description': (body.get('description') or '').strip(),
+        'categoryId': body.get('categoryId', ''),
+        'categoryName': body.get('categoryName', 'General'),
+        'image': body.get('image', ''),
+        'plans': plans,
+        'createdAt': digital_products.now_iso(),
+        'updatedAt': digital_products.now_iso(),
+    }
+    await db.digital_subscription_products.insert_one(doc)
+    return digital_products.clean_doc(doc)
+
+@api_router.put("/admin/digital/subscription-products/{prod_id}")
+async def update_sub_product(prod_id: str, body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': digital_products.now_iso()}
+    for k in ['title', 'description', 'categoryId', 'categoryName', 'image', 'plans']:
+        if k in body:
+            upd[k] = body[k]
+    res = await db.digital_subscription_products.update_one({'id': prod_id}, {'$set': upd})
+    if not res.matched_count:
+        raise HTTPException(status_code=404, detail='Product not found')
+    return digital_products.clean_doc(await db.digital_subscription_products.find_one({'id': prod_id}))
+
+@api_router.delete("/admin/digital/subscription-products/{prod_id}")
+async def delete_sub_product(prod_id: str, user: dict = Depends(require_admin)):
+    res = await db.digital_subscription_products.delete_one({'id': prod_id})
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail='Product not found')
+    return {'ok': True, 'id': prod_id}
+
+# --- Subscription Orders ---
+@api_router.get("/admin/digital/subscription-orders")
+async def list_sub_orders(user: dict = Depends(require_admin)):
+    orders = await db.digital_subscription_orders.find().sort('createdAt', -1).to_list(200)
+    return [digital_products.clean_doc(o) for o in orders]
+
+@api_router.post("/admin/digital/subscription-orders")
+async def create_sub_order(body: dict, user: dict = Depends(require_admin)):
+    doc = {
+        'id': f"subord_{uuid.uuid4().hex[:8]}",
+        'userEmail': body.get('userEmail', 'buyer@example.com'),
+        'userName': body.get('userName', 'Customer'),
+        'productTitle': body.get('productTitle', 'Subscription Product'),
+        'planName': body.get('planName', 'Monthly'),
+        'price': float(body.get('price', 19.99)),
+        'orderStatus': body.get('orderStatus', 'completed'),
+        'createdAt': digital_products.now_iso(),
+    }
+    await db.digital_subscription_orders.insert_one(doc)
+    return digital_products.clean_doc(doc)
+
+# --- Gift Card Brands ---
+@api_router.get("/admin/digital/gift-card-brands")
+async def list_gc_brands(user: dict = Depends(require_admin)):
+    brands = await db.digital_gift_card_brands.find().sort('name', 1).to_list(100)
+    return [digital_products.clean_doc(b) for b in brands]
+
+@api_router.post("/admin/digital/gift-card-brands")
+async def create_gc_brand(body: dict, user: dict = Depends(require_admin)):
+    name = (body.get('name') or '').strip()
+    if not name:
+        raise HTTPException(status_code=400, detail='Brand name is required')
+    doc = {
+        'id': f"gcbrand_{uuid.uuid4().hex[:8]}",
+        'name': name,
+        'logo': body.get('logo', ''),
+        'description': (body.get('description') or '').strip(),
+        'createdAt': digital_products.now_iso(),
+        'updatedAt': digital_products.now_iso(),
+    }
+    await db.digital_gift_card_brands.insert_one(doc)
+    return digital_products.clean_doc(doc)
+
+@api_router.put("/admin/digital/gift-card-brands/{brand_id}")
+async def update_gc_brand(brand_id: str, body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': digital_products.now_iso()}
+    for k in ['name', 'logo', 'description']:
+        if k in body:
+            upd[k] = body[k]
+    res = await db.digital_gift_card_brands.update_one({'id': brand_id}, {'$set': upd})
+    if not res.matched_count:
+        raise HTTPException(status_code=404, detail='Brand not found')
+    return digital_products.clean_doc(await db.digital_gift_card_brands.find_one({'id': brand_id}))
+
+@api_router.delete("/admin/digital/gift-card-brands/{brand_id}")
+async def delete_gc_brand(brand_id: str, user: dict = Depends(require_admin)):
+    res = await db.digital_gift_card_brands.delete_one({'id': brand_id})
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail='Brand not found')
+    return {'ok': True, 'id': brand_id}
+
+# --- Gift Cards ---
+@api_router.get("/admin/digital/gift-cards")
+async def list_gift_cards(user: dict = Depends(require_admin)):
+    cards = await db.digital_gift_cards.find().sort('createdAt', -1).to_list(200)
+    return [digital_products.clean_doc(c) for c in cards]
+
+@api_router.post("/admin/digital/gift-cards")
+async def create_gift_card(body: dict, user: dict = Depends(require_admin)):
+    doc = {
+        'id': f"gc_{uuid.uuid4().hex[:8]}",
+        'brandId': body.get('brandId', ''),
+        'brandName': body.get('brandName', 'Gift Card'),
+        'image': body.get('image', ''),
+        'description': body.get('description', ''),
+        'stock': int(body.get('stock', 10)),
+        'price': float(body.get('price', 25.0)),
+        'status': body.get('status', 'ON'),
+        'createdAt': digital_products.now_iso(),
+        'updatedAt': digital_products.now_iso(),
+    }
+    await db.digital_gift_cards.insert_one(doc)
+    return digital_products.clean_doc(doc)
+
+@api_router.put("/admin/digital/gift-cards/{gc_id}")
+async def update_gift_card(gc_id: str, body: dict, user: dict = Depends(require_admin)):
+    upd = {'updatedAt': digital_products.now_iso()}
+    for k in ['brandId', 'brandName', 'image', 'description', 'status']:
+        if k in body:
+            upd[k] = body[k]
+    if 'stock' in body:
+        upd['stock'] = int(body['stock'])
+    if 'price' in body:
+        upd['price'] = float(body['price'])
+    res = await db.digital_gift_cards.update_one({'id': gc_id}, {'$set': upd})
+    if not res.matched_count:
+        raise HTTPException(status_code=404, detail='Gift card not found')
+    return digital_products.clean_doc(await db.digital_gift_cards.find_one({'id': gc_id}))
+
+@api_router.delete("/admin/digital/gift-cards/{gc_id}")
+async def delete_gift_card(gc_id: str, user: dict = Depends(require_admin)):
+    res = await db.digital_gift_cards.delete_one({'id': gc_id})
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail='Gift card not found')
+    return {'ok': True, 'id': gc_id}
+
+# --- Gift Card Orders ---
+@api_router.get("/admin/digital/gift-card-orders")
+async def list_gc_orders(user: dict = Depends(require_admin)):
+    orders = await db.digital_gift_card_orders.find().sort('createdAt', -1).to_list(200)
+    return [digital_products.clean_doc(o) for o in orders]
+
+@api_router.post("/admin/digital/gift-card-orders")
+async def create_gc_order(body: dict, user: dict = Depends(require_admin)):
+    doc = {
+        'id': f"gcord_{uuid.uuid4().hex[:8]}",
+        'userEmail': body.get('userEmail', 'buyer@example.com'),
+        'userName': body.get('userName', 'Customer'),
+        'brandName': body.get('brandName', 'Brand'),
+        'amount': float(body.get('amount', 25.0)),
+        'orderStatus': body.get('orderStatus', 'completed'),
+        'deliveryStatus': body.get('deliveryStatus', 'delivered'),
+        'createdAt': digital_products.now_iso(),
+    }
+    await db.digital_gift_card_orders.insert_one(doc)
+    return digital_products.clean_doc(doc)
+
+
+# ===========================================================================
 # MARKETPLACE COMMISSION SYSTEM (Admin only)
 # ===========================================================================
 DEFAULT_COMMISSION_SETTINGS = {
@@ -2028,6 +2244,12 @@ async def startup():
         logger.info("Storage initialized")
     except Exception as e:
         logger.error(f"Storage init failed: {e}")
+    # Digital products initial seed
+    try:
+        await digital_products.ensure_initial_seed(db)
+        logger.info("Digital products initial seed verified")
+    except Exception as e:
+        logger.warning(f"digital products seed warning: {e}")
 
 
 @app.on_event("shutdown")
