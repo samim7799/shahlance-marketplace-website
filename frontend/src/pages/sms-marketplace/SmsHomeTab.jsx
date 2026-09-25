@@ -14,10 +14,10 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
   };
 
   return (
-    <div className="space-y-5" data-testid="sms-home-view">
+    <div className="space-y-4" data-testid="sms-home-view">
       {/* 1. USDT Wallet Balance Card (UI only) */}
       <div
-        className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-[#0f172a] via-[#111e38] to-[#0d1627] border border-white/10 shadow-2xl"
+        className="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-[#0e1628] via-[#111e38] to-[#0d1627] border border-white/10 shadow-2xl transition-all"
         data-testid="usdt-wallet-balance-card"
       >
         {/* Decorative backdrop glow */}
@@ -34,7 +34,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
                 USDT Wallet Balance
               </span>
             </div>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Instant Escrow
             </span>
@@ -56,7 +56,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
               type="button"
               data-testid="add-funds-btn"
               onClick={onAddFunds}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-lg shadow-emerald-500/25 active:scale-95"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-lg shadow-emerald-500/25 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 cursor-pointer"
             >
               <Plus size={15} strokeWidth={3} />
               <span>Add Funds</span>
@@ -96,7 +96,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
             type="button"
             data-testid="quick-action-buy-number"
             onClick={() => onNavigate('services')}
-            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-emerald-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28"
+            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-emerald-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28 cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -116,8 +116,8 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
           <button
             type="button"
             data-testid="quick-action-saved-services"
-            onClick={() => onNavigate('services', { filter: 'saved' })}
-            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-sky-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28"
+            onClick={() => onNavigate('services')}
+            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-sky-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28 cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <div className="h-10 w-10 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -138,7 +138,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
             type="button"
             data-testid="quick-action-rent-numbers"
             onClick={() => onNavigate('rent')}
-            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-purple-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28"
+            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-purple-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28 cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -159,7 +159,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
             type="button"
             data-testid="quick-action-my-orders"
             onClick={() => onNavigate('orders')}
-            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-amber-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28"
+            className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-amber-500/40 transition-all text-left group active:scale-[0.98] shadow-sm flex flex-col justify-between h-28 cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -187,7 +187,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
           <button
             type="button"
             onClick={() => onNavigate('services')}
-            className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-0.5"
+            className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-0.5 cursor-pointer"
           >
             <span>View all</span>
             <ChevronRight size={13} />
@@ -205,7 +205,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
               type="button"
               data-testid={`spotlight-service-${item.code}`}
               onClick={() => onNavigate('services')}
-              className="p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-emerald-500/30 text-left transition-all"
+              className="p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-emerald-500/30 text-left transition-all cursor-pointer hover:bg-black/60"
             >
               <div className="text-base">{item.flag}</div>
               <div className="font-bold text-xs text-white truncate mt-1">{item.name}</div>
@@ -237,7 +237,7 @@ export default function SmsHomeTab({ onNavigate, walletBalance = '42.50', onAddF
             type="button"
             data-testid="copy-promo-code-btn"
             onClick={handleCopyCode}
-            className="shrink-0 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-colors inline-flex items-center gap-1"
+            className="shrink-0 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-colors inline-flex items-center gap-1 cursor-pointer active:scale-95 shadow-md shadow-emerald-500/20"
           >
             {copiedPromo ? <Check size={13} strokeWidth={3} /> : <Copy size={13} />}
             <span>{copiedPromo ? 'Copied' : 'Copy'}</span>

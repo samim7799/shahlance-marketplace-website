@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, CheckCircle2, XCircle, Copy, Check, RefreshCw, Smartphone, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, Copy, Check, RefreshCw, Smartphone, AlertCircle, ShieldCheck } from 'lucide-react';
 
 export default function SmsOrdersTab({ orders = [] }) {
   const [activeStatusTab, setActiveStatusTab] = useState('active'); // active | completed | cancelled
@@ -38,7 +38,7 @@ export default function SmsOrdersTab({ orders = [] }) {
               type="button"
               data-testid={`sms-order-tab-${tab.id}`}
               onClick={() => setActiveStatusTab(tab.id)}
-              className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 isActive
                   ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
                   : 'text-slate-400 hover:text-white'
@@ -115,7 +115,7 @@ export default function SmsOrdersTab({ orders = [] }) {
                     type="button"
                     data-testid={`copy-phone-btn-${order.id}`}
                     onClick={() => handleCopy(order.phone, order.id)}
-                    className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white border border-white/10 flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white border border-white/10 flex items-center gap-1 transition-colors cursor-pointer active:scale-95"
                   >
                     {isCopied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                     <span>{isCopied ? 'Copied' : 'Copy'}</span>
@@ -134,7 +134,7 @@ export default function SmsOrdersTab({ orders = [] }) {
                         <button
                           type="button"
                           onClick={() => handleCopy(order.code, `code-${order.id}`)}
-                          className="text-slate-400 hover:text-white p-1"
+                          className="text-slate-400 hover:text-white p-1 cursor-pointer"
                           title="Copy Code"
                         >
                           {copiedId === `code-${order.id}` ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}

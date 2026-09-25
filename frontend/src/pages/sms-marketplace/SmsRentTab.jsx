@@ -37,7 +37,7 @@ export default function SmsRentTab({ onRentCreated }) {
   return (
     <div className="space-y-4" data-testid="sms-rent-view">
       {/* Header Info */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-[#10142a] to-slate-900 border border-purple-500/20 space-y-1.5">
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-[#10142a] to-slate-900 border border-purple-500/20 space-y-1.5 shadow-lg">
         <div className="flex items-center gap-1.5 text-xs font-bold text-purple-400">
           <Radio size={14} /> Long-Term Dedicated Rental
         </div>
@@ -48,8 +48,8 @@ export default function SmsRentTab({ onRentCreated }) {
       </div>
 
       {successMessage && (
-        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-bold flex items-center gap-2">
-          <Check size={14} />
+        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-bold flex items-center gap-2 animate-fade-in">
+          <Check size={14} strokeWidth={2.5} />
           <span>{successMessage}</span>
         </div>
       )}
@@ -117,7 +117,7 @@ export default function SmsRentTab({ onRentCreated }) {
                   data-testid={`rent-button-${card.id}`}
                   disabled={renting}
                   onClick={() => handleConfirmRent(card)}
-                  className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
+                  className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     card.popular
                       ? 'bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-md shadow-sky-500/20'
                       : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md shadow-emerald-500/20'
