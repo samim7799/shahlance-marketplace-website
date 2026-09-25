@@ -101,6 +101,25 @@ Continue development of an existing GitHub project (samim7788/shahlance-web-dev)
   * Auto-seed initial data verification on startup for seamless admin evaluation.
 - Verified: 100% backend pass rate (3/3 in `test_digital_products.py` + non-admin 403 authorization gating) and 100% frontend verification via Playwright automation.
 
+## Implemented (Sep 2026 — Advanced Admin Tools Module)
+- Added dedicated Advanced Admin Tools module (`advanced_admin_tools.py`, `AdvancedAdminToolsPanel.jsx`, and routes in `server.py`):
+  * **1. CMS Management**:
+    - Platform Logo: Upload / Replace logo URL, Enable / Disable display toggle, Live preview.
+    - Hero Banner: Upload / Replace banner URL, Heading & Subheading editor, Enable / Disable display toggle.
+    - Homepage Content: Edit hero title, hero subtitle, and CTA text sections with instant save.
+    - Custom Pages: Full CRUD (Create page, Edit page, Delete page, Publish / Unpublish status toggle) for platform terms, privacy, and FAQs.
+  * **2. Reports Dashboard**:
+    - Sales Report: Total sales ($), order counts, paid order metrics, and average order value.
+    - Profit Report: Platform profit calculation based on active marketplace commission rate and summary.
+    - User Growth: Total registered users, new user count in last 30 days, and growth rate.
+    - Service Analytics: Category breakdown product usage and order status distribution (paid, pending, other).
+  * **3. Security Tools**:
+    - Admin Activity Logs: Real-time action audit trail recording admin email, action name, details, client IP, and timestamps.
+    - Login History & IP Tracking: Comprehensive audit log of administrator logins with IP tracking, user-agent string, and status.
+    - Two-Factor Authentication: Admin 2FA enforcement policy setting toggle (Enable/Disable).
+- Authorization: Full RBAC gating verified (non-admin receives 403 Forbidden).
+- Verified: 100% backend pass rate (3/3 in `test_advanced_admin_tools.py`), full suite regression passed (21/21 in pytest), and 100% frontend UI verification via Playwright automation.
+
 ## Backlog / next
 - P1: Wire live Cryptomus/NOWPayments payment creation + webhooks using the stored gateway configs (needs real merchant API keys from user); connect Accounts payment UI to a real gateway.
 - P1: Bring seller-uploaded (approved) products into the public marketplace listing (replace/augment mock catalog with GET /api/seller/products?status=approved) so the whole catalog is DB-backed and searchable.
